@@ -118,119 +118,119 @@ struct FloatingDragPreviewPrivate
 //============================================================================
 void FloatingDragPreviewPrivate::updateDropOverlays(const QPoint &GlobalPos)
 {
-	if (!_this->isVisible() || !DockManager)
-	{
-		return;
-	}
+    if (!_this->isVisible() || !DockManager)
+    {
+        return;
+    }
 
-	auto Containers = DockManager->dockContainers();
-	CDockContainerWidget *TopContainer = nullptr;
-	for (auto ContainerWidget : Containers)
-	{
-		if (!ContainerWidget->isVisible())
-		{
-			continue;
-		}
+    auto Containers = DockManager->dockContainers();
+    CDockContainerWidget *TopContainer = nullptr;
+    for (auto ContainerWidget : Containers)
+    {
+        if (!ContainerWidget->isVisible())
+        {
+            continue;
+        }
 
-		QPoint MappedPos = ContainerWidget->mapFromGlobal(GlobalPos);
-		if (ContainerWidget->rect().contains(MappedPos))
-		{
-			if (!TopContainer || ContainerWidget->isInFrontOf(TopContainer))
-			{
-				TopContainer = ContainerWidget;
-			}
-		}
-	}
+        QPoint MappedPos = ContainerWidget->mapFromGlobal(GlobalPos);
+        if (ContainerWidget->rect().contains(MappedPos))
+        {
+            if (!TopContainer || ContainerWidget->isInFrontOf(TopContainer))
+            {
+                TopContainer = ContainerWidget;
+            }
+        }
+    }
 
-	DropContainer = TopContainer;
-	auto ContainerOverlay = DockManager->containerOverlay();
-	auto DockAreaOverlay = DockManager->dockAreaOverlay();
+    DropContainer = TopContainer;
+    auto ContainerOverlay = DockManager->containerOverlay();
+    auto DockAreaOverlay = DockManager->dockAreaOverlay();
 
-	if (!TopContainer)
-	{
-		ContainerOverlay->hideOverlay();
-		DockAreaOverlay->hideOverlay();
-		if (CDockManager::testConfigFlag(CDockManager::DragPreviewIsDynamic))
-		{
-			setHidden(false);
-		}
-		return;
-	}
+    if (!TopContainer)
+    {
+        ContainerOverlay->hideOverlay();
+        DockAreaOverlay->hideOverlay();
+        if (CDockManager::testConfigFlag(CDockManager::DragPreviewIsDynamic))
+        {
+            setHidden(false);
+        }
+        return;
+    }
 
-	auto DockDropArea = DockAreaOverlay->dropAreaUnderCursor();
-	auto ContainerDropArea = ContainerOverlay->dropAreaUnderCursor();
+    auto DockDropArea = DockAreaOverlay->dropAreaUnderCursor();
+    auto ContainerDropArea = ContainerOverlay->dropAreaUnderCursor();
 
-	int VisibleDockAreas = TopContainer->visibleDockAreaCount();
+    int VisibleDockAreas = TopContainer->visibleDockAreaCount();
 
-	// Include the overlay widget we're dragging as a visible widget
-	auto dockAreaWidget = qobject_cast<CDockAreaWidget*>(Content);
-	if (dockAreaWidget && dockAreaWidget->isAutoHide())
-	{
-		VisibleDockAreas++;
-	}
+    // Include the overlay widget we're dragging as a visible widget
+    auto dockAreaWidget = qobject_cast<CDockAreaWidget*>(Content);
+    if (dockAreaWidget && dockAreaWidget->isAutoHide())
+    {
+        VisibleDockAreas++;
+    }
 
-	DockWidgetAreas AllowedContainerAreas = (VisibleDockAreas > 1) ? OuterDockAreas : AllDockAreas;
-	//ContainerOverlay->enableDropPreview(ContainerDropArea != InvalidDockWidgetArea);
-	auto DockArea = TopContainer->dockAreaAt(GlobalPos);
-	// If the dock container contains only one single DockArea, then we need
-	// to respect the allowed areas - only the center area is relevant here because
-	// all other allowed areas are from the container
-	if (VisibleDockAreas == 1 && DockArea)
-	{
-		AllowedContainerAreas.setFlag(CenterDockWidgetArea, DockArea->allowedAreas().testFlag(CenterDockWidgetArea));
-	}
+    DockWidgetAreas AllowedContainerAreas = (VisibleDockAreas > 1) ? OuterDockAreas : AllDockAreas;
+    //ContainerOverlay->enableDropPreview(ContainerDropArea != InvalidDockWidgetArea);
+    auto DockArea = TopContainer->dockAreaAt(GlobalPos);
+    // If the dock container contains only one single DockArea, then we need
+    // to respect the allowed areas - only the center area is relevant here because
+    // all other allowed areas are from the container
+    if (VisibleDockAreas == 1 && DockArea)
+    {
+        AllowedContainerAreas.setFlag(CenterDockWidgetArea, DockArea->allowedAreas().testFlag(CenterDockWidgetArea));
+    }
 
-	if (isContentPinnable())
-	{
-		AllowedContainerAreas |= AutoHideDockAreas;
-	}
-	ContainerOverlay->setAllowedAreas(AllowedContainerAreas);
-	ContainerOverlay->enableDropPreview(ContainerDropArea != InvalidDockWidgetArea);
-	if (DockArea && DockArea->isVisible() && VisibleDockAreas >= 0 && DockArea != ContentSourceArea)
-	{
-		DockAreaOverlay->enableDropPreview(true);
-		DockAreaOverlay->setAllowedAreas( (VisibleDockAreas == 1) ? NoDockWidgetArea : DockArea->allowedAreas());
-		DockWidgetArea Area = DockAreaOverlay->showOverlay(DockArea);
+    if (isContentPinnable())
+    {
+        AllowedContainerAreas |= AutoHideDockAreas;
+    }
+    ContainerOverlay->setAllowedAreas(CenterDockWidgetArea);    //only allow to dock to the center of floating window
+    ContainerOverlay->enableDropPreview(ContainerDropArea != InvalidDockWidgetArea);
+    if (DockArea && DockArea->isVisible() && VisibleDockAreas >= 0 && DockArea != ContentSourceArea)
+    {
+        DockAreaOverlay->enableDropPreview(true);
+        DockAreaOverlay->setAllowedAreas( (VisibleDockAreas == 1) ? NoDockWidgetArea : DockArea->allowedAreas());
+        DockWidgetArea Area = DockAreaOverlay->showOverlay(DockArea);
 
-		// A CenterDockWidgetArea for the dockAreaOverlay() indicates that
-		// the mouse is in the title bar. If the ContainerArea is valid
-		// then we ignore the dock area of the dockAreaOverlay() and disable
-		// the drop preview
-		if ((Area == CenterDockWidgetArea) && (ContainerDropArea != InvalidDockWidgetArea))
-		{
-			DockAreaOverlay->enableDropPreview(false);
-			ContainerOverlay->enableDropPreview(true);
-		}
-		else
-		{
-			ContainerOverlay->enableDropPreview(InvalidDockWidgetArea == Area);
-		}
-		ContainerOverlay->showOverlay(TopContainer);
-	}
-	else
-	{
-		DockAreaOverlay->hideOverlay();
-		// If there is only one single visible dock area in a container, then
-		// it does not make sense to show a dock overlay because the dock area
-		// would be removed and inserted at the same position. Only auto hide
-		// area is allowed
-		if (VisibleDockAreas == 1)
-		{
-			ContainerOverlay->setAllowedAreas(AutoHideDockAreas);
-		}
-		ContainerOverlay->showOverlay(TopContainer);
+        // A CenterDockWidgetArea for the dockAreaOverlay() indicates that
+        // the mouse is in the title bar. If the ContainerArea is valid
+        // then we ignore the dock area of the dockAreaOverlay() and disable
+        // the drop preview
+        if ((Area == CenterDockWidgetArea) && (ContainerDropArea != InvalidDockWidgetArea))
+        {
+            DockAreaOverlay->enableDropPreview(false);
+            ContainerOverlay->enableDropPreview(true);
+        }
+        else
+        {
+            ContainerOverlay->enableDropPreview(InvalidDockWidgetArea == Area);
+        }
+        ContainerOverlay->showOverlay(TopContainer);
+    }
+    else
+    {
+        DockAreaOverlay->hideOverlay();
+        // If there is only one single visible dock area in a container, then
+        // it does not make sense to show a dock overlay because the dock area
+        // would be removed and inserted at the same position. Only auto hide
+        // area is allowed
+        if (VisibleDockAreas == 1)
+        {
+            ContainerOverlay->setAllowedAreas(AutoHideDockAreas);
+        }
+        ContainerOverlay->showOverlay(TopContainer);
 
 
-		if (DockArea == ContentSourceArea && InvalidDockWidgetArea == ContainerDropArea)
-		{
-			DropContainer = nullptr;
-		}
-	}
+        if (DockArea == ContentSourceArea && InvalidDockWidgetArea == ContainerDropArea)
+        {
+            DropContainer = nullptr;
+        }
+    }
 
-	if (CDockManager::testConfigFlag(CDockManager::DragPreviewIsDynamic))
-	{
-		setHidden(DockDropArea != InvalidDockWidgetArea || ContainerDropArea != InvalidDockWidgetArea);
-	}
+    if (CDockManager::testConfigFlag(CDockManager::DragPreviewIsDynamic))
+    {
+        setHidden(DockDropArea != InvalidDockWidgetArea || ContainerDropArea != InvalidDockWidgetArea);
+    }
 }
 
 
