@@ -24,6 +24,7 @@
 #include "DockOverlay.h"
 #include "AutoHideDockContainer.h"
 #include "ads_globals.h"
+#include "DockSnappingManager.h"
 
 namespace ads
 {
@@ -352,11 +353,19 @@ CFloatingDragPreview::~CFloatingDragPreview()
 //============================================================================
 void CFloatingDragPreview::moveFloating()
 {
-    int BorderSize = (frameSize().width() - size().width()) / 2;
-    const QPoint moveToPos = QCursor::pos() - d->DragStartMousePosition
-        - QPoint(BorderSize, 0);
-    move(moveToPos);
-    d->updateDropOverlays(QCursor::pos());
+    if (auto snap = DockSnappingManager::instance().getSnapPoint(this, d->DockManager, d->DragStartMousePosition); snap.has_value())
+    {
+        auto [position, containers] = snap.value();
+        move(position);
+    }
+    else
+    {
+        int borderSize = (frameSize().width() - size().width()) / 2;
+        const QPoint cursorPos = QCursor::pos();
+        QPoint moveToPos = cursorPos - d->DragStartMousePosition - QPoint(borderSize, 0);
+        move(moveToPos);
+        d->updateDropOverlays(QCursor::pos());
+    }
 }
 
 

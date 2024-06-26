@@ -45,6 +45,7 @@
 #include "DockManager.h"
 #include "DockWidget.h"
 #include "DockOverlay.h"
+#include "DockSnappingManager.h"
 
 #ifdef Q_OS_WIN
 #include <windows.h>
@@ -1043,10 +1044,28 @@ void CFloatingDockContainer::startFloating(const QPoint &DragStartMousePos,
 //============================================================================
 void CFloatingDockContainer::moveFloating()
 {
-	int BorderSize = (frameSize().width() - size().width()) / 2;
-	const QPoint moveToPos = QCursor::pos() - d->DragStartMousePosition
-	    - QPoint(BorderSize, 0);
-	move(moveToPos);
+    if (auto snap = DockSnappingManager::instance().getSnapPoint(this, d->DockManager, d->DragStartMousePosition); snap.has_value())
+    {
+        for (auto container : d->DockManager->dockContainers())
+        {
+            if (container->isFloating())
+            {
+
+            }
+        }
+        auto [position, containers] = snap.value();
+        move(position);
+        qInfo() << containers.size();
+        // DockSnappingManager::instance().addSnappingRelation(this, d->DockManager->dockContainers().first())
+    }
+    else
+    {
+        int borderSize = (frameSize().width() - size().width()) / 2;
+        const QPoint cursorPos = QCursor::pos();
+        QPoint moveToPos = cursorPos - d->DragStartMousePosition - QPoint(borderSize, 0);
+        move(moveToPos);
+    }
+
 	switch (d->DraggingState)
 	{
 	case DraggingMousePressed:
