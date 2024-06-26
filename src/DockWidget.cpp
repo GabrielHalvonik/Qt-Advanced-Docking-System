@@ -55,6 +55,7 @@
 
 #include "DockContainerWidget.h"
 #include "DockAreaWidget.h"
+#include "DockAreaTitleBar.h"
 #include "DockManager.h"
 #include "FloatingDockContainer.h"
 #include "DockSplitter.h"
@@ -380,6 +381,8 @@ CDockWidget::CDockWidget(const QString &title, QWidget *parent) :
 	{
 		setFocusPolicy(Qt::ClickFocus);
 	}
+
+    createDefaultToolBar()->installEventFilter(this);
 }
 
 //============================================================================
@@ -804,6 +807,15 @@ void CDockWidget::toggleViewInternal(bool Open)
 //============================================================================
 void CDockWidget::setDockArea(CDockAreaWidget* DockArea)
 {
+    if (DockArea == nullptr) return;
+
+    DockArea->setDockAreaFlag(ads::CDockAreaWidget::HideSingleWidgetTitleBar, true);
+    DockArea->titleBarButton(TitleBarButtonClose)->setVisible(false);
+    DockArea->titleBarButton(TitleBarButtonUndock)->setVisible(false);
+    DockArea->titleBarButton(TitleBarButtonTabsMenu)->setVisible(false);
+    DockArea->titleBarButton(TitleBarButtonMinimize)->setVisible(false);
+    DockArea->titleBarButton(TitleBarButtonAutoHide)->setVisible(false);
+
 	d->DockArea = DockArea;
 	d->ToggleViewAction->setChecked(DockArea != nullptr && !this->isClosed());
 	setParent(DockArea);
@@ -878,6 +890,46 @@ bool CDockWidget::event(QEvent *e)
 	}
 
 	return Super::event(e);
+}
+
+bool CDockWidget::eventFilter(QObject *watched, QEvent *event)
+{
+    if (event == nullptr)
+    {
+        return false;
+    }
+
+    bool eventHandled = false;
+
+    if (auto container = floatingDockContainer(); container != nullptr)
+    {
+        if (auto mouseEvent = dynamic_cast<QMouseEvent*>(event); mouseEvent != nullptr && event->type() == QEvent::MouseButtonPress)
+        {
+            floatingDockContainer()->startDragging(mouseEvent->pos(), container->size(), {});
+            eventHandled = true;
+        }
+        else if (event->type() == QEvent::MouseMove)
+        {
+            floatingDockContainer()->moveFloating();
+            eventHandled = true;
+        }
+        else if (event->type() == QEvent::MouseButtonRelease)
+        {
+            floatingDockContainer()->finishDragging();
+            eventHandled = true;
+        }
+    }
+
+    if (watched != nullptr && watched == toolBar())
+    {
+        if (event->type() == QEvent::MouseButtonPress || event->type() == QEvent::MouseButtonRelease || event->type() == QEvent::MouseMove)
+        {
+            QCoreApplication::sendEvent(dockAreaWidget()->titleBar(), event);
+            eventHandled = true;
+        }
+    }
+
+    return eventHandled;
 }
 
 

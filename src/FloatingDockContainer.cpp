@@ -605,7 +605,8 @@ void FloatingDockContainerPrivate::updateDropOverlays(const QPoint &GlobalPos)
 		AllowedContainerAreas |= AutoHideDockAreas;
 	}
 
-	ContainerOverlay->setAllowedAreas(AllowedContainerAreas);
+    // ContainerOverlay->setAllowedAreas(AllowedContainerAreas);
+    ContainerOverlay->setAllowedAreas(CenterDockWidgetArea);    //only allow to dock into center for tabbing...sides should use snapping
 
 	DockWidgetArea ContainerArea = ContainerOverlay->showOverlay(TopContainer);
 	ContainerOverlay->enableDropPreview(ContainerArea != InvalidDockWidgetArea);
@@ -719,15 +720,16 @@ CFloatingDockContainer::CFloatingDockContainer(CDockManager *DockManager) :
 				this, &CFloatingDockContainer::onMaximizeRequest);
 	}
 #else
-	setWindowFlags(
-	    Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
-	QBoxLayout *l = new QBoxLayout(QBoxLayout::TopToBottom);
+    // setWindowFlags(
+    //     Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
+    QBoxLayout *l = new QBoxLayout(QBoxLayout::TopToBottom);
 	l->setContentsMargins(0, 0, 0, 0);
 	l->setSpacing(0);
 	setLayout(l);
 	l->addWidget(d->DockContainer);
 #endif
 
+    setWindowFlags(Qt::Tool | Qt::FramelessWindowHint);
 	DockManager->registerFloatingWidget(this);
 }
 

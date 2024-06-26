@@ -352,11 +352,11 @@ CFloatingDragPreview::~CFloatingDragPreview()
 //============================================================================
 void CFloatingDragPreview::moveFloating()
 {
-	int BorderSize = (frameSize().width() - size().width()) / 2;
-	const QPoint moveToPos = QCursor::pos() - d->DragStartMousePosition
-	    - QPoint(BorderSize, 0);
-	move(moveToPos);
-	d->updateDropOverlays(QCursor::pos());
+    int BorderSize = (frameSize().width() - size().width()) / 2;
+    const QPoint moveToPos = QCursor::pos() - d->DragStartMousePosition
+        - QPoint(BorderSize, 0);
+    move(moveToPos);
+    d->updateDropOverlays(QCursor::pos());
 }
 
 

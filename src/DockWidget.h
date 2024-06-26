@@ -577,6 +577,8 @@ public: // reimplements QFrame -----------------------------------------------
      */
     virtual bool event(QEvent *e) override;
 
+    bool eventFilter(QObject *watched, QEvent *event);
+
 public Q_SLOTS:
     /**
      * This property controls whether the dock widget is open or closed.
@@ -700,6 +702,7 @@ Q_SIGNALS:
      * The features parameter gives the new value of the property.
      */
     void featuresChanged(ads::CDockWidget::DockWidgetFeatures features);
+
 }; // class DockWidget
 } // namespace ads
 

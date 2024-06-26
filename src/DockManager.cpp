@@ -92,7 +92,7 @@ enum eStateFileVersion
 	CurrentVersion = Version1//!< CurrentVersion
 };
 
-static CDockManager::ConfigFlags StaticConfigFlags = CDockManager::DefaultNonOpaqueConfig;
+static CDockManager::ConfigFlags StaticConfigFlags = CDockManager::OpaqueSplitterResize | CDockManager::XmlCompressionEnabled | CDockManager::FocusHighlighting;
 static CDockManager::AutoHideFlags StaticAutoHideConfigFlags; // auto hide feature is disabled by default
 
 static QString FloatingContainersTitle;
