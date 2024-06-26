@@ -30,6 +30,7 @@ windows {
 RESOURCES += ads.qrc
 
 HEADERS += \
+    DockSnappingManager.h \
     ads_globals.h \
     DockAreaWidget.h \
     DockAreaTabBar.h \
@@ -56,6 +57,7 @@ HEADERS += \
 
 
 SOURCES += \
+    DockSnappingManager.cpp \
     ads_globals.cpp \
     DockAreaWidget.cpp \
     DockAreaTabBar.cpp \
