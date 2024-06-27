@@ -23,7 +23,7 @@ std::tuple<bool, QPoint> DockSnappingManager::getSnapPoint(QWidget* preview, CDo
 
     int snapDistance = 20;
     struct {
-        u_int8_t order;
+        uint8_t order;
         QPoint position;
         std::vector<CFloatingDockContainer*> snappingCandidates;
     } bestSnap { };
@@ -57,7 +57,7 @@ std::tuple<bool, QPoint> DockSnappingManager::getSnapPoint(QWidget* preview, CDo
 
             int containerCornerIndices[8] { 1, 0, 3, 2, 2, 3, 0, 1 };
 
-            for (u_int8_t j = 0; j < 8; ++j)
+            for (uint8_t j = 0; j < 8; ++j)
             {
                 int distance = (previewCorners[previewCornerIndices[j]] - containerCorners[containerCornerIndices[j]]).manhattanLength();
                 if (distance <= snapDistance) {
