@@ -17,7 +17,7 @@ DockSnappingManager& DockSnappingManager::instance()
     return Instance;
 }
 
-std::optional<QPoint> DockSnappingManager::getSnapPoint(QWidget* preview, CDockManager* manager, const QPoint& dragStartMousePosition)
+std::tuple<bool, QPoint> DockSnappingManager::getSnapPoint(QWidget* preview, CDockManager* manager, const QPoint& dragStartMousePosition)
 {
     const QPoint cursorPos = QCursor::pos();
 
@@ -103,10 +103,10 @@ std::optional<QPoint> DockSnappingManager::getSnapPoint(QWidget* preview, CDockM
             pos = (cursorPos - dragStartMousePosition);
         }
 
-        return { pos };
+        return { true, pos };
     }
 
-    return { };
+    return { false, { } };
 }
 
 std::vector<CFloatingDockContainer*> DockSnappingManager::querySnappedChain(CDockManager* manager, CFloatingDockContainer* target) {

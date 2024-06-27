@@ -1,5 +1,7 @@
 #pragma once
 
+#include <tuple>
+
 #include <QPoint>
 
 QT_FORWARD_DECLARE_CLASS(QWidget)
@@ -16,7 +18,7 @@ public:
 
     static DockSnappingManager& instance();
 
-    std::optional<QPoint> getSnapPoint(QWidget* preview, CDockManager* manager, const QPoint& dragStartMousePosition);
+    std::tuple<bool, QPoint> getSnapPoint(QWidget* preview, CDockManager* manager, const QPoint& dragStartMousePosition);
     std::vector<CFloatingDockContainer*> querySnappedChain(CDockManager* manager, CFloatingDockContainer* target);
 
 private:
