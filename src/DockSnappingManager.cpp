@@ -21,13 +21,12 @@ std::tuple<bool, QPoint> DockSnappingManager::getSnapPoint(QWidget* preview, CDo
 {
     const QPoint cursorPos = QCursor::pos();
 
-    int snapDistance = 20;
     struct {
         uint8_t order;
         QPoint position;
         std::vector<CFloatingDockContainer*> snappingCandidates;
     } bestSnap { };
-    int bestSnapDistance = snapDistance;
+    int bestSnapDistance = SnapDistance;
 
     QRect previewRect = preview->geometry();
     QPoint previewCorners[4] = {
@@ -60,7 +59,7 @@ std::tuple<bool, QPoint> DockSnappingManager::getSnapPoint(QWidget* preview, CDo
             for (uint8_t j = 0; j < 8; ++j)
             {
                 int distance = (previewCorners[previewCornerIndices[j]] - containerCorners[containerCornerIndices[j]]).manhattanLength();
-                if (distance <= snapDistance) {
+                if (distance <= SnapDistance) {
                     if (distance < bestSnapDistance)
                     {
                         bestSnap = { j, containerCorners[containerCornerIndices[j]], { container->floatingWidget() } };
@@ -75,7 +74,7 @@ std::tuple<bool, QPoint> DockSnappingManager::getSnapPoint(QWidget* preview, CDo
         }
     }
 
-    if (bestSnapDistance < snapDistance)
+    if (bestSnapDistance < SnapDistance)
     {
         QPoint pos;
 
@@ -99,7 +98,7 @@ std::tuple<bool, QPoint> DockSnappingManager::getSnapPoint(QWidget* preview, CDo
             break;
         }
 
-        if ((cursorPos - (preview->mapTo({}, previewRect.topLeft()) + dragStartMousePosition)).manhattanLength() > snapDistance) {
+        if ((cursorPos - (preview->mapTo({}, previewRect.topLeft()) + dragStartMousePosition)).manhattanLength() > SnapDistance) {
             pos = (cursorPos - dragStartMousePosition);
         }
 
@@ -116,8 +115,6 @@ std::vector<CFloatingDockContainer*> DockSnappingManager::querySnappedChain(CDoc
 
     toVisit.push(target);
     visited.insert(target);
-
-    int snapDistance = 10;
 
     while (!toVisit.empty())
     {
@@ -154,7 +151,7 @@ std::vector<CFloatingDockContainer*> DockSnappingManager::querySnappedChain(CDoc
                         for (const auto& candidateCorner : candidateCorners)
                         {
                             int distance = (currentCorner - candidateCorner).manhattanLength();
-                            if (distance <= snapDistance)
+                            if (distance <= SnapDistance)
                             {
                                 isSnapped = true;
                                 break;

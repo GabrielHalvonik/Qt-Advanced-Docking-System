@@ -1054,7 +1054,8 @@ void CFloatingDockContainer::moveFloating()
         }
     }
 
-    else {
+    else
+    {
         auto result = DockSnappingManager::instance().getSnapPoint(this, d->DockManager, d->DragStartMousePosition);
         if (std::get<0>(result))
         {
@@ -1071,11 +1072,11 @@ void CFloatingDockContainer::moveFloating()
 	{
 	case DraggingMousePressed:
 		d->setState(DraggingFloatingWidget);
-		d->updateDropOverlays(QCursor::pos());
+        d->updateDropOverlays(QCursor::pos());
 		break;
 
 	case DraggingFloatingWidget:
-		d->updateDropOverlays(QCursor::pos());
+        d->updateDropOverlays(QCursor::pos());
 #ifdef Q_OS_MACOS
 		// In OSX when hiding the DockAreaOverlay the application would set
 		// the main window as the active window for some reason. This fixes
