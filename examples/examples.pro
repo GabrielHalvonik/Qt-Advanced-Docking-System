@@ -1,12 +1,12 @@
 TEMPLATE = subdirs
 
 SUBDIRS = \
-    autohide \
+    # autohide \
     centralwidget \
-	simple \
-	hideshow \
-	sidebar \
-	deleteonclose \
-	emptydockarea \
-	dockindock \
-	configflags
+        # simple \
+        # hideshow \
+        # sidebar \
+        # deleteonclose \
+        # emptydockarea \
+        # dockindock \
+        # configflags
