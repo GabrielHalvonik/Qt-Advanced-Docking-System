@@ -1043,30 +1043,78 @@ void CFloatingDockContainer::startFloating(const QPoint &DragStartMousePos,
 void CFloatingDockContainer::moveFloating()
 {
     int borderSize = (frameSize().width() - size().width()) / 2;
-    QPoint offset = (QCursor::pos() - d->DragStartMousePosition - QPoint(borderSize, 0)) - this->pos();
-    QPoint moveToPos = QCursor::pos() - d->DragStartMousePosition - QPoint(borderSize, 0);
+    QPoint currentCursorPos = QCursor::pos();
+    QPoint moveToPos = currentCursorPos - d->DragStartMousePosition - QPoint(borderSize, 0);
+    QPoint offset = moveToPos - pos();
 
-    if (QGuiApplication::keyboardModifiers() & Qt::ShiftModifier)
+    auto snapping = DockSnappingManager::instance().getSnapPoint(this, d->DockManager, d->DragStartMousePosition);
+    bool shouldSnap = std::get<0>(snapping);
+    QPoint snapPosition = std::get<1>(snapping);
+
+    auto chain = DockSnappingManager::instance().querySnappedChain(d->DockManager, this);
+    // qInfo() << "ch: " << chain.size();
+
+    if (QGuiApplication::keyboardModifiers() & Qt::ShiftModifier && (shouldSnap || chain.size() > 0))
     {
-        for (auto item : DockSnappingManager::instance().querySnappedChain(d->DockManager, this))
+        move(moveToPos);
+
+
+        for (auto item : chain)
         {
-            item->move(item->pos() + offset);
+            if (shouldSnap && snapPosition != pos())
+            {
+                item->move(item->pos() - (snapPosition - pos()));
+            }
+            else
+            {
+                item->move(item->pos() + offset);
+            }
         }
     }
 
-    else
-    {
-        auto result = DockSnappingManager::instance().getSnapPoint(this, d->DockManager, d->DragStartMousePosition);
-        if (std::get<0>(result))
+    else {
+        if (shouldSnap)
         {
-            move(std::get<1>(result));
+            move(snapPosition);
         }
         else
         {
             move(moveToPos);
         }
     }
+/*
+    if (shouldSnap)
+    {
+        if (snapPosition != pos())
+        {
+            move(snapPosition);
+        }
+    }
+    else
+    {
+        move(moveToPos);
+    }
 
+    if (QGuiApplication::keyboardModifiers() & Qt::ShiftModifier && offset != QPoint(0, 0))
+    {
+        qInfo() << "Shift dragging";
+
+        for (auto item : DockSnappingManager::instance().querySnappedChain(d->DockManager, this))
+        {
+            item->move(item->pos() + offset);
+        }
+    }
+*/
+
+    qInfo() << pos() << " - " << snapPosition << "-" << offset;
+
+    // if (QGuiApplication::keyboardModifiers() & Qt::ShiftModifier && shouldSnap && snapPosition == pos())
+    // {
+    //     for (auto item : DockSnappingManager::instance().querySnappedChain(d->DockManager, this))
+    //     {
+    //         item->move(item->pos() + offset);
+    //     }
+    // }
 
 	switch (d->DraggingState)
 	{

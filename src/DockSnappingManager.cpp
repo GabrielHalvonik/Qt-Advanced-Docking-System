@@ -120,7 +120,10 @@ std::vector<CFloatingDockContainer*> DockSnappingManager::querySnappedChain(CDoc
     {
         CFloatingDockContainer* current = toVisit.front();
         toVisit.pop();
-        chain.push_back(current);
+        if (current != target)
+        {
+            chain.push_back(current);
+        }
 
         QRect currentRect = current->geometry();
         QPoint currentCorners[4] = {

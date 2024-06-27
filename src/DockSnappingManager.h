@@ -22,7 +22,7 @@ public:
     std::tuple<bool, QPoint> getSnapPoint(QWidget* preview, CDockManager* manager, const QPoint& dragStartMousePosition);
     std::vector<CFloatingDockContainer*> querySnappedChain(CDockManager* manager, CFloatingDockContainer* target);
 
-    const int SnapDistance = 10;
+    const int SnapDistance = 15;
 
 private:
     DockSnappingManager() = default;
