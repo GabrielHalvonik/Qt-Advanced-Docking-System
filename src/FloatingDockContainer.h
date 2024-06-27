@@ -269,8 +269,6 @@ public:
 	 */
 	void finishDropOperation();
 
-    std::vector<CFloatingDockContainer*> querySnappedChain();
-
 #if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
     /**
 	 * This is a function that responds to FloatingWidgetTitleBar::maximizeRequest()

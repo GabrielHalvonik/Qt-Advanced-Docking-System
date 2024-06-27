@@ -1,5 +1,8 @@
 #include "DockSnappingManager.h"
 
+#include <queue>
+#include <unordered_set>
+
 #include <QCursor>
 #include <QWidget>
 
@@ -104,6 +107,73 @@ std::optional<std::tuple<QPoint, std::vector<CFloatingDockContainer*>>> DockSnap
     }
 
     return { };
+}
+
+std::vector<CFloatingDockContainer*> DockSnappingManager::querySnappedChain(CDockManager* manager, CFloatingDockContainer* target) {
+    std::vector<CFloatingDockContainer*> chain;
+    std::unordered_set<CFloatingDockContainer*> visited;
+    std::queue<CFloatingDockContainer*> toVisit;
+
+    toVisit.push(target);
+    visited.insert(target);
+
+    int snapDistance = 10;
+
+    while (!toVisit.empty())
+    {
+        CFloatingDockContainer* current = toVisit.front();
+        toVisit.pop();
+        chain.push_back(current);
+
+        QRect currentRect = current->geometry();
+        QPoint currentCorners[4] = {
+            current->parentWidget()->mapToGlobal(currentRect.topLeft()),
+            current->parentWidget()->mapToGlobal(currentRect.topRight()),
+            current->parentWidget()->mapToGlobal(currentRect.bottomLeft()),
+            current->parentWidget()->mapToGlobal(currentRect.bottomRight())
+        };
+
+        for (auto containerWidget : manager->dockContainers())
+        {
+            if (containerWidget->isFloating())
+            {
+                CFloatingDockContainer* candidate = containerWidget->floatingWidget();
+                if (candidate && candidate != current && visited.find(candidate) == visited.end())
+                {
+                    QRect candidateRect = candidate->geometry();
+                    QPoint candidateCorners[4] = {
+                        candidate->parentWidget()->mapToGlobal(candidateRect.topLeft()),
+                        candidate->parentWidget()->mapToGlobal(candidateRect.topRight()),
+                        candidate->parentWidget()->mapToGlobal(candidateRect.bottomLeft()),
+                        candidate->parentWidget()->mapToGlobal(candidateRect.bottomRight())
+                    };
+
+                    bool isSnapped = false;
+                    for (const auto& currentCorner : currentCorners)
+                    {
+                        for (const auto& candidateCorner : candidateCorners)
+                        {
+                            int distance = (currentCorner - candidateCorner).manhattanLength();
+                            if (distance <= snapDistance)
+                            {
+                                isSnapped = true;
+                                break;
+                            }
+                        }
+                        if (isSnapped) break;
+                    }
+
+                    if (isSnapped)
+                    {
+                        toVisit.push(candidate);
+                        visited.insert(candidate);
+                    }
+                }
+            }
+        }
+    }
+
+    return chain;
 }
 
 }

@@ -28,9 +28,6 @@
 //============================================================================
 #include "FloatingDockContainer.h"
 
-#include <queue>
-#include <unordered_set>
-
 #include <QBoxLayout>
 #include <QApplication>
 #include <QMouseEvent>
@@ -1051,7 +1048,7 @@ void CFloatingDockContainer::moveFloating()
 
     if (QGuiApplication::keyboardModifiers() & Qt::ShiftModifier)
     {
-        for (auto item : querySnappedChain())
+        for (auto item : DockSnappingManager::instance().querySnappedChain(d->DockManager, this))
         {
             item->move(item->pos() + offset);
         }
@@ -1217,74 +1214,6 @@ void CFloatingDockContainer::finishDropOperation()
 		d->DockManager->removeFloatingWidget(this);
 		d->DockManager->removeDockContainer(this->dockContainer());
 	}
-}
-
-//============================================================================
-std::vector<CFloatingDockContainer*> CFloatingDockContainer::querySnappedChain() {
-    std::vector<CFloatingDockContainer*> chain;
-    std::unordered_set<CFloatingDockContainer*> visited;
-    std::queue<CFloatingDockContainer*> toVisit;
-
-    toVisit.push(this);
-    visited.insert(this);
-
-    int snapDistance = 10;
-
-    while (!toVisit.empty())
-    {
-        CFloatingDockContainer* current = toVisit.front();
-        toVisit.pop();
-        chain.push_back(current);
-
-        QRect currentRect = current->geometry();
-        QPoint currentCorners[4] = {
-            current->parentWidget()->mapToGlobal(currentRect.topLeft()),
-            current->parentWidget()->mapToGlobal(currentRect.topRight()),
-            current->parentWidget()->mapToGlobal(currentRect.bottomLeft()),
-            current->parentWidget()->mapToGlobal(currentRect.bottomRight())
-        };
-
-        for (auto containerWidget : d->DockManager->dockContainers())
-        {
-            if (containerWidget->isFloating())
-            {
-                CFloatingDockContainer* candidate = containerWidget->floatingWidget();
-                if (candidate && candidate != current && visited.find(candidate) == visited.end())
-                {
-                    QRect candidateRect = candidate->geometry();
-                    QPoint candidateCorners[4] = {
-                        candidate->parentWidget()->mapToGlobal(candidateRect.topLeft()),
-                        candidate->parentWidget()->mapToGlobal(candidateRect.topRight()),
-                        candidate->parentWidget()->mapToGlobal(candidateRect.bottomLeft()),
-                        candidate->parentWidget()->mapToGlobal(candidateRect.bottomRight())
-                    };
-
-                    bool isSnapped = false;
-                    for (const auto& currentCorner : currentCorners)
-                    {
-                        for (const auto& candidateCorner : candidateCorners)
-                        {
-                            int distance = (currentCorner - candidateCorner).manhattanLength();
-                            if (distance <= snapDistance)
-                            {
-                                isSnapped = true;
-                                break;
-                            }
-                        }
-                        if (isSnapped) break;
-                    }
-
-                    if (isSnapped)
-                    {
-                        toVisit.push(candidate);
-                        visited.insert(candidate);
-                    }
-                }
-            }
-        }
-    }
-
-    return chain;
 }
 
 //============================================================================
