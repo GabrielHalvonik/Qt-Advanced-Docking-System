@@ -16,7 +16,7 @@ public:
 
     static DockSnappingManager& instance();
 
-    std::optional<std::tuple<QPoint, std::vector<CFloatingDockContainer*>>> getSnapPoint(QWidget* preview, CDockManager* manager, const QPoint& dragStartMousePosition);
+    std::optional<QPoint> getSnapPoint(QWidget* preview, CDockManager* manager, const QPoint& dragStartMousePosition);
     std::vector<CFloatingDockContainer*> querySnappedChain(CDockManager* manager, CFloatingDockContainer* target);
 
 private:

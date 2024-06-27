@@ -1057,8 +1057,7 @@ void CFloatingDockContainer::moveFloating()
     else {
         if (auto snap = DockSnappingManager::instance().getSnapPoint(this, d->DockManager, d->DragStartMousePosition); snap.has_value())
         {
-            auto [position, containers] = snap.value();
-            move(position);
+            move(snap.value());
         }
         else
         {
