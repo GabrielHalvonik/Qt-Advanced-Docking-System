@@ -28,7 +28,8 @@
 //============================================================================
 #include "FloatingDockContainer.h"
 
-#include <iostream>
+#include <queue>
+#include <unordered_set>
 
 #include <QBoxLayout>
 #include <QApplication>
@@ -1044,27 +1045,30 @@ void CFloatingDockContainer::startFloating(const QPoint &DragStartMousePos,
 //============================================================================
 void CFloatingDockContainer::moveFloating()
 {
-    if (auto snap = DockSnappingManager::instance().getSnapPoint(this, d->DockManager, d->DragStartMousePosition); snap.has_value())
-    {
-        for (auto container : d->DockManager->dockContainers())
-        {
-            if (container->isFloating())
-            {
+    int borderSize = (frameSize().width() - size().width()) / 2;
+    QPoint offset = (QCursor::pos() - d->DragStartMousePosition - QPoint(borderSize, 0)) - this->pos();
+    QPoint moveToPos = QCursor::pos() - d->DragStartMousePosition - QPoint(borderSize, 0);
 
-            }
-        }
-        auto [position, containers] = snap.value();
-        move(position);
-        qInfo() << containers.size();
-        // DockSnappingManager::instance().addSnappingRelation(this, d->DockManager->dockContainers().first())
-    }
-    else
+    if (QGuiApplication::keyboardModifiers() & Qt::ShiftModifier)
     {
-        int borderSize = (frameSize().width() - size().width()) / 2;
-        const QPoint cursorPos = QCursor::pos();
-        QPoint moveToPos = cursorPos - d->DragStartMousePosition - QPoint(borderSize, 0);
-        move(moveToPos);
+        for (auto item : querySnappedChain())
+        {
+            item->move(item->pos() + offset);
+        }
     }
+
+    else {
+        if (auto snap = DockSnappingManager::instance().getSnapPoint(this, d->DockManager, d->DragStartMousePosition); snap.has_value())
+        {
+            auto [position, containers] = snap.value();
+            move(position);
+        }
+        else
+        {
+            move(moveToPos);
+        }
+    }
+
 
 	switch (d->DraggingState)
 	{
@@ -1213,6 +1217,74 @@ void CFloatingDockContainer::finishDropOperation()
 		d->DockManager->removeFloatingWidget(this);
 		d->DockManager->removeDockContainer(this->dockContainer());
 	}
+}
+
+//============================================================================
+std::vector<CFloatingDockContainer*> CFloatingDockContainer::querySnappedChain() {
+    std::vector<CFloatingDockContainer*> chain;
+    std::unordered_set<CFloatingDockContainer*> visited;
+    std::queue<CFloatingDockContainer*> toVisit;
+
+    toVisit.push(this);
+    visited.insert(this);
+
+    int snapDistance = 10;
+
+    while (!toVisit.empty())
+    {
+        CFloatingDockContainer* current = toVisit.front();
+        toVisit.pop();
+        chain.push_back(current);
+
+        QRect currentRect = current->geometry();
+        QPoint currentCorners[4] = {
+            current->parentWidget()->mapToGlobal(currentRect.topLeft()),
+            current->parentWidget()->mapToGlobal(currentRect.topRight()),
+            current->parentWidget()->mapToGlobal(currentRect.bottomLeft()),
+            current->parentWidget()->mapToGlobal(currentRect.bottomRight())
+        };
+
+        for (auto containerWidget : d->DockManager->dockContainers())
+        {
+            if (containerWidget->isFloating())
+            {
+                CFloatingDockContainer* candidate = containerWidget->floatingWidget();
+                if (candidate && candidate != current && visited.find(candidate) == visited.end())
+                {
+                    QRect candidateRect = candidate->geometry();
+                    QPoint candidateCorners[4] = {
+                        candidate->parentWidget()->mapToGlobal(candidateRect.topLeft()),
+                        candidate->parentWidget()->mapToGlobal(candidateRect.topRight()),
+                        candidate->parentWidget()->mapToGlobal(candidateRect.bottomLeft()),
+                        candidate->parentWidget()->mapToGlobal(candidateRect.bottomRight())
+                    };
+
+                    bool isSnapped = false;
+                    for (const auto& currentCorner : currentCorners)
+                    {
+                        for (const auto& candidateCorner : candidateCorners)
+                        {
+                            int distance = (currentCorner - candidateCorner).manhattanLength();
+                            if (distance <= snapDistance)
+                            {
+                                isSnapped = true;
+                                break;
+                            }
+                        }
+                        if (isSnapped) break;
+                    }
+
+                    if (isSnapped)
+                    {
+                        toVisit.push(candidate);
+                        visited.insert(candidate);
+                    }
+                }
+            }
+        }
+    }
+
+    return chain;
 }
 
 //============================================================================

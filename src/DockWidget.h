@@ -577,7 +577,7 @@ public: // reimplements QFrame -----------------------------------------------
      */
     virtual bool event(QEvent *e) override;
 
-    bool eventFilter(QObject *watched, QEvent *event);
+    bool eventFilter(QObject *watched, QEvent *event) override;
 
 public Q_SLOTS:
     /**

@@ -33,7 +33,6 @@
 #include "DockManager.h"
 
 #include <algorithm>
-#include <iostream>
 
 #include <QMainWindow>
 #include <QList>
