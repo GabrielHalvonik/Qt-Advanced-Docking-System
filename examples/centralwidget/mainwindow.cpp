@@ -23,6 +23,8 @@
 #include "DockAreaTabBar.h"
 #include "FloatingDockContainer.h"
 #include "DockComponentsFactory.h"
+#include "centralwidget.h"
+#include "toolpanel.h"
 
 using namespace ads;
 
@@ -40,15 +42,14 @@ CMainWindow::CMainWindow(QWidget *parent)
     // Set central widget
     QPlainTextEdit* w = new QPlainTextEdit();
 	w->setPlaceholderText("This is the central editor. Enter your text here.");
+    CentralWidget* widget = new CentralWidget();
     CDockWidget* CentralDockWidget = new CDockWidget("CentralWidget");
-    CentralDockWidget->setWidget(w);
+    CentralDockWidget->setWidget(widget);
     auto* CentralDockArea = DockManager->setCentralWidget(CentralDockWidget);
     CentralDockArea->setAllowedAreas(DockWidgetArea::OuterDockAreas);
 
     // create other dock widgets
-    QTableWidget* table = new QTableWidget();
-    table->setColumnCount(3);
-    table->setRowCount(10);
+    ToolPanel* table = new ToolPanel();
     CDockWidget* TableDockWidget = new CDockWidget("Table 1");
     TableDockWidget->setWidget(table);
     TableDockWidget->setMinimumSizeHintMode(CDockWidget::MinimumSizeHintFromDockWidget);
@@ -57,9 +58,7 @@ CMainWindow::CMainWindow(QWidget *parent)
     auto TableArea = DockManager->addDockWidget(DockWidgetArea::LeftDockWidgetArea, TableDockWidget);
     ui->menuView->addAction(TableDockWidget->toggleViewAction());
 
-    table = new QTableWidget();
-    table->setColumnCount(5);
-    table->setRowCount(1020);
+    table = new ToolPanel();
     TableDockWidget = new CDockWidget("Table 2");
     TableDockWidget->setWidget(table);
     TableDockWidget->setMinimumSizeHintMode(CDockWidget::MinimumSizeHintFromDockWidget);
@@ -68,9 +67,7 @@ CMainWindow::CMainWindow(QWidget *parent)
     DockManager->addDockWidget(DockWidgetArea::BottomDockWidgetArea, TableDockWidget, TableArea);
     ui->menuView->addAction(TableDockWidget->toggleViewAction());
 
-    QTableWidget* propertiesTable = new QTableWidget();
-    propertiesTable->setColumnCount(3);
-    propertiesTable->setRowCount(10);
+    ToolPanel* propertiesTable = new ToolPanel();
     CDockWidget* PropertiesDockWidget = new CDockWidget("Properties");
     PropertiesDockWidget->setWidget(propertiesTable);
     PropertiesDockWidget->setMinimumSizeHintMode(CDockWidget::MinimumSizeHintFromDockWidget);
@@ -129,5 +126,3 @@ void CMainWindow::closeEvent(QCloseEvent* event)
     DockManager->deleteLater();
 	QMainWindow::closeEvent(event);
 }
-
-
