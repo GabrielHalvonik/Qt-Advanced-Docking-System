@@ -11,11 +11,17 @@
 namespace ads
 {
 
+DockSnappingManager::DockSnappingManager() : cursorRestrictionFilter(new CursorRestrictionFilter())
+{
+
+}
+
 DockSnappingManager& DockSnappingManager::instance()
 {
     static DockSnappingManager Instance;
     return Instance;
 }
+
 
 std::tuple<bool, QPoint> DockSnappingManager::getSnapPoint(QWidget* preview, CDockManager* manager, const QPoint& dragStartMousePosition)
 {
@@ -120,7 +126,7 @@ std::vector<CFloatingDockContainer*> DockSnappingManager::querySnappedChain(CDoc
     {
         CFloatingDockContainer* current = toVisit.front();
         toVisit.pop();
-        if (current != target)
+        // if (current != target)
         {
             chain.push_back(current);
         }
@@ -174,6 +180,20 @@ std::vector<CFloatingDockContainer*> DockSnappingManager::querySnappedChain(CDoc
     }
 
     return chain;
+}
+
+QRect DockSnappingManager::calculateSnappedBoundingBox(std::vector<CFloatingDockContainer*>& containers) {
+    if (containers.empty()) {
+        return QRect();
+    }
+
+    QRect boundingBox = containers[0]->geometry();
+
+    for (size_t i = 0; i < containers.size(); ++i) {
+        boundingBox = boundingBox.united(containers[i]->geometry());
+    }
+
+    return boundingBox;
 }
 
 }
