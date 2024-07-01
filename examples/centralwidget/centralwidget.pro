@@ -1,6 +1,6 @@
 ADS_OUT_ROOT = $${OUT_PWD}/../..
 
-QT       += core gui widgets
+QT       += core gui widgets # openglwidgets
 
 TARGET = CentralWidgetExample
 DESTDIR = $${ADS_OUT_ROOT}/lib
@@ -18,11 +18,15 @@ adsBuildStatic {
 DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
+    centralwidget.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    toolpanel.cpp
 
 HEADERS += \
-    mainwindow.h
+    centralwidget.h \
+    mainwindow.h \
+    toolpanel.h
 
 FORMS += \
     mainwindow.ui

@@ -1,7 +1,20 @@
 #pragma once
 
+#include <QWidget>
+
+class QGestureEvent;
+
+class CentralWidget : public QWidget
+{
+public:
+    CentralWidget()
+    {
+        setStyleSheet("QWidget { background-color: white; }");
+    }
+};
+
+/*  // OpenGL painting widget
 #include <QPainter>
-#include <QGestureEvent>
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
 
@@ -17,19 +30,6 @@ struct Snapshot
     QRect region { };
     uchar* data { };
 };
-
-class QGestureEvent;
-
-class CentralWidget : public QWidget
-{
-public:
-    CentralWidget()
-    {
-        setStyleSheet("QWidget { background-color: white; }");
-    }
-};
-
-/*  // OpenGL painting widget
 
 class CentralWidget : public QOpenGLWidget, protected QOpenGLFunctions
 {
