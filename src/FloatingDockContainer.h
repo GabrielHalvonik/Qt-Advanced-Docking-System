@@ -106,6 +106,7 @@ class ADS_EXPORT CFloatingDockContainer : public tFloatingWidgetBase, public IFl
 	Q_OBJECT
 private:
 	FloatingDockContainerPrivate* d; ///< private data (pimpl)
+    std::vector<CFloatingDockContainer*> snappedDockGroup;
 	friend struct FloatingDockContainerPrivate;
 	friend class CDockManager;
 	friend struct DockManagerPrivate;
@@ -134,11 +135,7 @@ protected:
 	/**
 	 * Call this function to start dragging the floating widget
 	 */
-    void startDragging(const QPoint& DragStartMousePos, const QSize& Size,
-        QWidget* MouseEventHandler)
-	{
-        startFloating(DragStartMousePos, Size, DraggingFloatingWidget, MouseEventHandler);
-	}
+    void startDragging(const QPoint& DragStartMousePos, const QSize& Size, QWidget* MouseEventHandler);
 
 	/**
 	 * Call this function if you explicitly want to signal that dragging has
@@ -182,6 +179,9 @@ protected:
     void updateWindowTitle();
 
 protected: // reimplements QWidget
+    void keyPressEvent(QKeyEvent *event) override;
+    void keyReleaseEvent(QKeyEvent *event) override;
+
 	virtual void changeEvent(QEvent *event) override;
 	virtual void closeEvent(QCloseEvent *event) override;
 	virtual void hideEvent(QHideEvent *event) override;
@@ -305,6 +305,7 @@ public:
 	 */
 	bool hasNativeTitleBar();
 #endif
+
 }; // class FloatingDockContainer
 }
  // namespace ads
