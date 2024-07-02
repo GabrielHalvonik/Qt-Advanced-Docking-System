@@ -37,6 +37,7 @@
 #include <QAbstractButton>
 #include <QElapsedTimer>
 #include <QTime>
+#include <QScreen>
 
 #include "DockContainerWidget.h"
 #include "DockAreaWidget.h"
@@ -1050,40 +1051,6 @@ void CFloatingDockContainer::startDragging(const QPoint &DragStartMousePos, cons
     startFloating(DragStartMousePos, Size, DraggingFloatingWidget, MouseEventHandler);
 }
 
-void restrictCursorToScreenBounds(const QRect& boundingBox, QScreen* screen = QGuiApplication::primaryScreen()) {
-    // Get the screen geometry
-    QRect screenGeometry = screen->geometry();
-    // QApplication::instance()->installEventFilter()
-    // Check if the bounding box goes outside the screen bounds
-    if (!screenGeometry.contains(boundingBox)) {
-        // Restrict the cursor position
-        // QCursor::
-        QPoint cursorPos = QCursor::pos();
-
-        // Adjust cursor position if it's outside the allowed area
-        int x = cursorPos.x();
-        int y = cursorPos.y();
-        if (boundingBox.left() < screenGeometry.left()) {
-            qInfo() << "1!!!";
-            x = std::max(screenGeometry.left(), cursorPos.x());
-        }
-        if (boundingBox.right() > screenGeometry.right()) {
-            qInfo() << "2!!!";
-            x = std::min(screenGeometry.right(), cursorPos.x());
-        }
-        if (boundingBox.top() < screenGeometry.top()) {
-            qInfo() << "3!!!";
-            y = std::max(screenGeometry.top(), cursorPos.y());
-        }
-        if (boundingBox.bottom() > screenGeometry.bottom()) {
-            qInfo() << "4!!!";
-            y = std::min(screenGeometry.bottom(), cursorPos.y());
-        }
-
-        QCursor::setPos(x, y);
-    }
-}
-
 //============================================================================
 void CFloatingDockContainer::moveFloating()
 {
@@ -1113,18 +1080,6 @@ void CFloatingDockContainer::moveFloating()
         move(moveToPos);
         DockSnappingManager::instance().clearSnappedChain();
     }
-
-
-    // */
-
-
-    // if (QGuiApplication::keyboardModifiers() & Qt::ShiftModifier && shouldSnap && snapPosition == pos())
-    // {
-    //     for (auto item : DockSnappingManager::instance().querySnappedChain(d->DockManager, this))
-    //     {
-    //         item->move(item->pos() + offset);
-    //     }
-    // }
 
     switch (d->DraggingState)
     {

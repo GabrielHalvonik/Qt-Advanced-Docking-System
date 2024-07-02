@@ -5,6 +5,7 @@
 
 #include <QCursor>
 #include <QWidget>
+#include <QScreen>
 
 #include "DockManager.h"
 
