@@ -1294,23 +1294,6 @@ void CFloatingDockContainer::updateWindowTitle()
     }
 }
 
-void CFloatingDockContainer::keyPressEvent(QKeyEvent *event)
-{
-    if (event->key() == Qt::Key_Shift)
-    {
-        qInfo() << "shift pressed";
-    }
-}
-
-void CFloatingDockContainer::keyReleaseEvent(QKeyEvent *event)
-{
-    if (event->key() == Qt::Key_Shift)
-    {
-        qInfo() << "shift released";
-        QApplication::instance()->removeEventFilter(DockSnappingManager::instance().cursorRestrictionFilter);
-    }
-}
-
 //============================================================================
 void CFloatingDockContainer::onDockAreaCurrentChanged(int Index)
 {

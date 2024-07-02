@@ -107,7 +107,7 @@ class ADS_EXPORT CFloatingDockContainer : public tFloatingWidgetBase, public IFl
 private:
 	FloatingDockContainerPrivate* d; ///< private data (pimpl)
     std::vector<CFloatingDockContainer*> snappedDockGroup;
-	friend struct FloatingDockContainerPrivate;
+    friend struct FloatingDockContainerPrivate;
 	friend class CDockManager;
 	friend struct DockManagerPrivate;
 	friend class CDockAreaTabBar;
@@ -178,9 +178,7 @@ protected:
 	 */
     void updateWindowTitle();
 
-protected: // reimplements QWidget
-    void keyPressEvent(QKeyEvent *event) override;
-    void keyReleaseEvent(QKeyEvent *event) override;
+protected:
 
 	virtual void changeEvent(QEvent *event) override;
 	virtual void closeEvent(QCloseEvent *event) override;

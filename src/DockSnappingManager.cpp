@@ -11,7 +11,7 @@
 namespace ads
 {
 
-DockSnappingManager::DockSnappingManager() : cursorRestrictionFilter(new CursorRestrictionFilter())
+DockSnappingManager::DockSnappingManager()
 {
 
 }
