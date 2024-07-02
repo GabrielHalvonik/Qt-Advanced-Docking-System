@@ -540,7 +540,6 @@ void FloatingDockContainerPrivate::updateDropOverlays(const QPoint &GlobalPos)
 {
     if (!_this->isVisible() || !DockManager || QGuiApplication::keyboardModifiers() & Qt::ShiftModifier)
     {
-        qInfo() << "return";
         return;
     }
 
@@ -1043,7 +1042,7 @@ void CFloatingDockContainer::startDragging(const QPoint &DragStartMousePos, cons
 {
     if (QGuiApplication::keyboardModifiers() & Qt::ShiftModifier)
     {
-        snappedDockGroup = DockSnappingManager::instance().querySnappedChain(d->DockManager, this);
+        DockSnappingManager::instance().storeSnappedChain(d->DockManager, this);
 
         // DockSnappingManager::instance().cursorRestrictionFilter->setBoundsToCheck(screen()->geometry(), DockSnappingManager::instance().calculateSnappedBoundingBox(snappedDockGroup));
         // QApplication::instance()->installEventFilter(DockSnappingManager::instance().cursorRestrictionFilter);
@@ -1085,25 +1084,6 @@ void restrictCursorToScreenBounds(const QRect& boundingBox, QScreen* screen = QG
     }
 }
 
-QPoint calculateOverhang(const QRect& screenBounds, const QRect& widgetBounds) {
-    int overhangX = 0;
-    int overhangY = 0;
-
-    if (widgetBounds.left() < screenBounds.left()) {
-        overhangX = widgetBounds.left() - screenBounds.left();
-    } else if (widgetBounds.right() > screenBounds.right()) {
-        overhangX = widgetBounds.right() - screenBounds.right();
-    }
-
-    if (widgetBounds.top() < screenBounds.top()) {
-        overhangY = widgetBounds.top() - screenBounds.top();
-    } else if (widgetBounds.bottom() > screenBounds.bottom()) {
-        overhangY = widgetBounds.bottom() - screenBounds.bottom();
-    }
-
-    return QPoint(overhangX, overhangY);
-}
-
 //============================================================================
 void CFloatingDockContainer::moveFloating()
 {
@@ -1112,92 +1092,26 @@ void CFloatingDockContainer::moveFloating()
     QPoint moveToPos = currentCursorPos - d->DragStartMousePosition - QPoint(borderSize, 0);
     QPoint offset = moveToPos - pos();
 
-    static QPoint lastCursorPos = currentCursorPos;
-    QPoint mouseOffset = currentCursorPos - lastCursorPos;
-    lastCursorPos = currentCursorPos;
-
     auto snapping = DockSnappingManager::instance().getSnapPoint(this, d->DockManager, d->DragStartMousePosition);
     bool shouldSnap = std::get<0>(snapping);
     QPoint snapPosition = std::get<1>(snapping);
 
     if (QGuiApplication::keyboardModifiers() & Qt::ShiftModifier)
     {
-        auto bounds = DockSnappingManager::instance().calculateSnappedBoundingBox(snappedDockGroup);
-        auto overhang = calculateOverhang(screen()->geometry(), bounds.translated(offset));
-
-        QPoint delta { };
-
-        if (!screen()->geometry().contains(bounds.translated(offset)))
-        {
-            for (auto item : snappedDockGroup)
-            {
-                item->move(item->pos() + offset - overhang);
-            }
-
-            if (snappedDockGroup.empty())
-            {
-                move(pos() + offset - overhang);
-            }
-        }
-        else
-        {
-            if (overhang.x() > 0 && mouseOffset.x() < 0)
-            {
-                delta.setX(delta.x() + mouseOffset.x());
-            }
-            if (overhang.x() < 0 && mouseOffset.x() > 0)
-            {
-                delta.setX(delta.x() + mouseOffset.x());
-            }
-            if (overhang.y() > 0 && mouseOffset.y() < 0)
-            {
-                delta.setY(delta.y() + mouseOffset.y());
-            }
-            if (overhang.y() < 0 && mouseOffset.y() > 0)
-            {
-                delta.setY(delta.y() + mouseOffset.y());
-            }
-
-            {
-                for (auto item : snappedDockGroup)
-                {
-                    if (delta == QPoint())
-                    {
-                        item->move(item->pos() + offset);
-                    }
-                    else
-                    {
-                        item->move(item->pos() + delta);
-                    }
-                }
-
-                if (snappedDockGroup.empty())
-                {
-                    if (delta == QPoint())
-                    {
-                        move(pos() + offset);
-                    }
-                    else
-                    {
-                        move(pos() + delta);
-                    }
-                }
-            }
-        }
+        DockSnappingManager::instance().moveSnappedDockGroup(this, currentCursorPos, offset);
     }
-
     else if (shouldSnap)
     {
         if (snapPosition != pos())
         {
             move(snapPosition);
-            snappedDockGroup = DockSnappingManager::instance().querySnappedChain(d->DockManager, this);
+            DockSnappingManager::instance().storeSnappedChain(d->DockManager, this);
         }
     }
     else
     {
         move(moveToPos);
-        snappedDockGroup.clear();
+        DockSnappingManager::instance().clearSnappedChain();
     }
 
 

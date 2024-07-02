@@ -114,7 +114,78 @@ std::tuple<bool, QPoint> DockSnappingManager::getSnapPoint(QWidget* preview, CDo
     return { false, { } };
 }
 
-std::vector<CFloatingDockContainer*> DockSnappingManager::querySnappedChain(CDockManager* manager, CFloatingDockContainer* target) {
+void DockSnappingManager::moveSnappedDockGroup(CFloatingDockContainer* owner, const QPoint& cursorPos, const QPoint& offset)
+{
+
+    QPoint mouseOffset = cursorPos - lastPosition;
+    lastPosition = cursorPos;
+
+    auto bounds = DockSnappingManager::instance().calculateSnappedBoundingBox(snappedDockGroup);
+    auto overhang = calculateOverhang(owner->screen()->geometry(), bounds.translated(offset));
+
+    QPoint delta { };
+
+    if (!owner->screen()->geometry().contains(bounds.translated(offset)))
+    {
+        for (auto item : snappedDockGroup)
+        {
+            item->move(item->pos() + offset - overhang);
+        }
+
+        if (snappedDockGroup.empty())
+        {
+            owner->move(owner->pos() + offset - overhang);
+        }
+    }
+    else
+    {
+        if (overhang.x() > 0 && mouseOffset.x() < 0)
+        {
+            delta.setX(delta.x() + mouseOffset.x());
+        }
+        if (overhang.x() < 0 && mouseOffset.x() > 0)
+        {
+            delta.setX(delta.x() + mouseOffset.x());
+        }
+        if (overhang.y() > 0 && mouseOffset.y() < 0)
+        {
+            delta.setY(delta.y() + mouseOffset.y());
+        }
+        if (overhang.y() < 0 && mouseOffset.y() > 0)
+        {
+            delta.setY(delta.y() + mouseOffset.y());
+        }
+
+        {
+            for (auto item : snappedDockGroup)
+            {
+                if (delta == QPoint())
+                {
+                    item->move(item->pos() + offset);
+                }
+                else
+                {
+                    item->move(item->pos() + delta);
+                }
+            }
+
+            if (snappedDockGroup.empty())
+            {
+                if (delta == QPoint())
+                {
+                    owner->move(owner->pos() + offset);
+                }
+                else
+                {
+                    owner->move(owner->pos() + delta);
+                }
+            }
+        }
+    }
+}
+
+std::vector<CFloatingDockContainer*> DockSnappingManager::querySnappedChain(CDockManager* manager, CFloatingDockContainer* target)
+{
     std::vector<CFloatingDockContainer*> chain;
     std::unordered_set<CFloatingDockContainer*> visited;
     std::queue<CFloatingDockContainer*> toVisit;
@@ -182,6 +253,32 @@ std::vector<CFloatingDockContainer*> DockSnappingManager::querySnappedChain(CDoc
     return chain;
 }
 
+QPoint DockSnappingManager::calculateOverhang(const QRect& screenBounds, const QRect& widgetBounds)
+{
+    int overhangX = 0;
+    int overhangY = 0;
+
+    if (widgetBounds.left() < screenBounds.left())
+    {
+        overhangX = widgetBounds.left() - screenBounds.left();
+    }
+    else if (widgetBounds.right() > screenBounds.right())
+    {
+        overhangX = widgetBounds.right() - screenBounds.right();
+    }
+
+    if (widgetBounds.top() < screenBounds.top())
+    {
+        overhangY = widgetBounds.top() - screenBounds.top();
+    }
+    else if (widgetBounds.bottom() > screenBounds.bottom())
+    {
+        overhangY = widgetBounds.bottom() - screenBounds.bottom();
+    }
+
+    return QPoint(overhangX, overhangY);
+}
+
 QRect DockSnappingManager::calculateSnappedBoundingBox(std::vector<CFloatingDockContainer*>& containers) {
     if (containers.empty()) {
         return QRect();
@@ -194,6 +291,16 @@ QRect DockSnappingManager::calculateSnappedBoundingBox(std::vector<CFloatingDock
     }
 
     return boundingBox;
+}
+
+void DockSnappingManager::storeSnappedChain(CDockManager* manager, CFloatingDockContainer* target)
+{
+    snappedDockGroup = querySnappedChain(manager, target);
+}
+
+void DockSnappingManager::clearSnappedChain()
+{
+    snappedDockGroup.clear();
 }
 
 }

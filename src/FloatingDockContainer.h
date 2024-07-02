@@ -106,7 +106,6 @@ class ADS_EXPORT CFloatingDockContainer : public tFloatingWidgetBase, public IFl
 	Q_OBJECT
 private:
 	FloatingDockContainerPrivate* d; ///< private data (pimpl)
-    std::vector<CFloatingDockContainer*> snappedDockGroup;
     friend struct FloatingDockContainerPrivate;
 	friend class CDockManager;
 	friend struct DockManagerPrivate;

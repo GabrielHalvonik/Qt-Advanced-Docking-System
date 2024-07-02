@@ -23,13 +23,27 @@ public:
     static DockSnappingManager& instance();
 
     std::tuple<bool, QPoint> getSnapPoint(QWidget* preview, CDockManager* manager, const QPoint& dragStartMousePosition);
-    std::vector<CFloatingDockContainer*> querySnappedChain(CDockManager* manager, CFloatingDockContainer* target);
+
+    void moveSnappedDockGroup(CFloatingDockContainer* owner, const QPoint& cursorPos, const QPoint& offset);
+
+    void storeSnappedChain(CDockManager* manager, CFloatingDockContainer* target);
+    void clearSnappedChain();
+
     QRect calculateSnappedBoundingBox(std::vector<CFloatingDockContainer*>& containers);
+
+public:
 
     const int SnapDistance = 15;
 
 private:
     DockSnappingManager();
+
+    std::vector<CFloatingDockContainer*> querySnappedChain(CDockManager* manager, CFloatingDockContainer* target);
+    QPoint calculateOverhang(const QRect& screenBounds, const QRect& widgetBounds);
+
+private:
+    QPoint lastPosition;
+    std::vector<CFloatingDockContainer*> snappedDockGroup;
 };
 
 }
