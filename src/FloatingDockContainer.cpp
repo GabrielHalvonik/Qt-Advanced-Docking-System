@@ -486,7 +486,7 @@ FloatingDockContainerPrivate::FloatingDockContainerPrivate(
     CFloatingDockContainer *_public) :
     _this(_public)
 {
-
+    
 }
 
 //============================================================================
@@ -1041,8 +1041,10 @@ void CFloatingDockContainer::startFloating(const QPoint &DragStartMousePos,
 
 void CFloatingDockContainer::startDragging(const QPoint &DragStartMousePos, const QSize &Size, QWidget *MouseEventHandler)
 {
+    qInfo() << "?? " << DragStartMousePos;
     if (QGuiApplication::keyboardModifiers() & Qt::ShiftModifier)
     {
+        DockSnappingManager::instance().draggingStarted(DragStartMousePos, this);
         DockSnappingManager::instance().storeSnappedChain(d->DockManager, this);
 
         // DockSnappingManager::instance().cursorRestrictionFilter->setBoundsToCheck(screen()->geometry(), DockSnappingManager::instance().calculateSnappedBoundingBox(snappedDockGroup));
@@ -1054,6 +1056,7 @@ void CFloatingDockContainer::startDragging(const QPoint &DragStartMousePos, cons
 //============================================================================
 void CFloatingDockContainer::moveFloating()
 {
+    auto screens = QApplication::screens();
     int borderSize = (frameSize().width() - size().width()) / 2;
     QPoint currentCursorPos = QCursor::pos();
     QPoint moveToPos = currentCursorPos - d->DragStartMousePosition - QPoint(borderSize, 0);
@@ -1244,6 +1247,11 @@ void CFloatingDockContainer::finishDragging()
     }
 #endif
     d->titleMouseReleaseEvent();
+    
+    if (QGuiApplication::keyboardModifiers() & Qt::ShiftModifier)
+    {
+        DockSnappingManager::instance().draggingFinished();
+    }
 }
 
 #ifdef Q_OS_MACOS

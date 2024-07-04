@@ -6,6 +6,7 @@
 #include <QCursor>
 #include <QWidget>
 #include <QScreen>
+#include <QApplication>
 
 #include "DockManager.h"
 
@@ -14,7 +15,12 @@ namespace ads
 
 DockSnappingManager::DockSnappingManager()
 {
-
+    // QObject::connect(dynamic_cast<QGuiApplication*>(QApplication::instance()), &QGuiApplication::screenAdded, [](QScreen* screen){
+    //     qInfo() << "screen added: " << screen->name();
+    // });
+    // QObject::connect(dynamic_cast<QGuiApplication*>(QApplication::instance()), &QGuiApplication::screenRemoved, [](QScreen* screen){
+    //     qInfo() << "screen removed: " << screen->name();
+    // });
 }
 
 DockSnappingManager& DockSnappingManager::instance()
@@ -23,6 +29,25 @@ DockSnappingManager& DockSnappingManager::instance()
     return Instance;
 }
 
+void DockSnappingManager::draggingStarted(const QPoint& offset, QWidget* source)
+{
+    draggingSourceWidget = { offset, source };
+    
+    if (!dockScreenRelocationEventFilter.isActive)
+    {
+        QCoreApplication::instance()->installEventFilter(&dockScreenRelocationEventFilter);
+        dockScreenRelocationEventFilter.isActive = true;
+    }
+}
+
+void DockSnappingManager::draggingFinished()
+{
+    if (dockScreenRelocationEventFilter.isActive)
+    {
+        QCoreApplication::instance()->removeEventFilter(&dockScreenRelocationEventFilter);
+        dockScreenRelocationEventFilter.isActive = false;
+    }
+}
 
 std::tuple<bool, QPoint> DockSnappingManager::getSnapPoint(QWidget* preview, CDockManager* manager, const QPoint& dragStartMousePosition)
 {
@@ -37,11 +62,11 @@ std::tuple<bool, QPoint> DockSnappingManager::getSnapPoint(QWidget* preview, CDo
 
     QRect previewRect = preview->geometry();
     QPoint previewCorners[4] = {
-                                preview->mapTo({}, previewRect.topLeft()),
-                                preview->mapTo({}, previewRect.topRight()),
-                                preview->mapTo({}, previewRect.bottomLeft()),
-                                preview->mapTo({}, previewRect.bottomRight()),
-                                };
+        preview->mapTo({}, previewRect.topLeft()),
+        preview->mapTo({}, previewRect.topRight()),
+        preview->mapTo({}, previewRect.bottomLeft()),
+        preview->mapTo({}, previewRect.bottomRight()),
+    };
 
     int previewCornerIndices[8] { 0, 1, 2, 3, 0, 1, 2, 3 };
 
@@ -115,18 +140,22 @@ std::tuple<bool, QPoint> DockSnappingManager::getSnapPoint(QWidget* preview, CDo
     return { false, { } };
 }
 
-void DockSnappingManager::moveSnappedDockGroup(CFloatingDockContainer* owner, const QPoint& cursorPos, const QPoint& offset)
+void DockSnappingManager::moveSnappedDockGroup(QWidget* owner, const QPoint& cursorPos, const QPoint& offset, QScreen* screen)
 {
-
+    if (screen == nullptr)
+    {
+        screen = owner->screen();
+    }
+    
     QPoint mouseOffset = cursorPos - lastPosition;
     lastPosition = cursorPos;
 
     auto bounds = DockSnappingManager::instance().calculateSnappedBoundingBox(snappedDockGroup);
-    auto overhang = calculateOverhang(owner->screen()->geometry(), bounds.translated(offset));
+    auto overhang = calculateOverhang(screen->geometry(), bounds.translated(offset));
 
     QPoint delta { };
 
-    if (!owner->screen()->geometry().contains(bounds.translated(offset)))
+    if (!screen->geometry().contains(bounds.translated(offset)))
     {
         for (auto item : snappedDockGroup)
         {
