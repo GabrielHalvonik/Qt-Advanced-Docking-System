@@ -34,11 +34,11 @@ public:
     
     void moveSnappedDockGroup(QWidget* owner, const QPoint& cursorPos, const QPoint& offset, QScreen* screen = nullptr);
     
-    void storeSnappedChain(CDockManager* manager, CFloatingDockContainer* target);
+    bool tryStoreSnappedChain(CDockManager* manager, CFloatingDockContainer* target);
     void clearSnappedChain();
     
     QRect calculateSnappedBoundingBox(std::vector<CFloatingDockContainer*>& containers);
-
+    
 public:
     const int SnapDistance = 15;
 

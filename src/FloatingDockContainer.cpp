@@ -373,6 +373,7 @@ struct FloatingDockContainerPrivate
     QPoint DragStartPos;
     bool Hiding = false;
     bool AutoHideChildren = true;
+    bool IsSnapped = false;
 #if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
     QWidget* MouseEventHandler = nullptr;
     CFloatingWidgetTitleBar* TitleBar = nullptr;
@@ -1041,11 +1042,10 @@ void CFloatingDockContainer::startFloating(const QPoint &DragStartMousePos,
 
 void CFloatingDockContainer::startDragging(const QPoint &DragStartMousePos, const QSize &Size, QWidget *MouseEventHandler)
 {
-    qInfo() << "?? " << DragStartMousePos;
     if (QGuiApplication::keyboardModifiers() & Qt::ShiftModifier)
     {
         DockSnappingManager::instance().draggingStarted(DragStartMousePos, this);
-        DockSnappingManager::instance().storeSnappedChain(d->DockManager, this);
+        d->IsSnapped = DockSnappingManager::instance().tryStoreSnappedChain(d->DockManager, this);
 
         // DockSnappingManager::instance().cursorRestrictionFilter->setBoundsToCheck(screen()->geometry(), DockSnappingManager::instance().calculateSnappedBoundingBox(snappedDockGroup));
         // QApplication::instance()->installEventFilter(DockSnappingManager::instance().cursorRestrictionFilter);
@@ -1056,7 +1056,6 @@ void CFloatingDockContainer::startDragging(const QPoint &DragStartMousePos, cons
 //============================================================================
 void CFloatingDockContainer::moveFloating()
 {
-    auto screens = QApplication::screens();
     int borderSize = (frameSize().width() - size().width()) / 2;
     QPoint currentCursorPos = QCursor::pos();
     QPoint moveToPos = currentCursorPos - d->DragStartMousePosition - QPoint(borderSize, 0);
@@ -1065,8 +1064,8 @@ void CFloatingDockContainer::moveFloating()
     auto snapping = DockSnappingManager::instance().getSnapPoint(this, d->DockManager, d->DragStartMousePosition);
     bool shouldSnap = std::get<0>(snapping);
     QPoint snapPosition = std::get<1>(snapping);
-
-    if (QGuiApplication::keyboardModifiers() & Qt::ShiftModifier)
+    
+    if (QGuiApplication::keyboardModifiers() & Qt::ShiftModifier && d->IsSnapped)
     {
         DockSnappingManager::instance().moveSnappedDockGroup(this, currentCursorPos, offset);
     }
@@ -1075,7 +1074,7 @@ void CFloatingDockContainer::moveFloating()
         if (snapPosition != pos())
         {
             move(snapPosition);
-            DockSnappingManager::instance().storeSnappedChain(d->DockManager, this);
+            DockSnappingManager::instance().tryStoreSnappedChain(d->DockManager, this);
         }
     }
     else

@@ -228,9 +228,9 @@ std::vector<CFloatingDockContainer*> DockSnappingManager::querySnappedChain(CDoc
         CFloatingDockContainer* current = toVisit.front();
         toVisit.pop();
         // if (current != target)
-        {
+        // {
             chain.push_back(current);
-        }
+        // }
 
         QRect currentRect = current->geometry();
         QPoint currentCorners[4] = {
@@ -323,9 +323,10 @@ QRect DockSnappingManager::calculateSnappedBoundingBox(std::vector<CFloatingDock
     return boundingBox;
 }
 
-void DockSnappingManager::storeSnappedChain(CDockManager* manager, CFloatingDockContainer* target)
+bool DockSnappingManager::tryStoreSnappedChain(CDockManager* manager, CFloatingDockContainer* target)
 {
     snappedDockGroup = querySnappedChain(manager, target);
+    return snappedDockGroup.size() > 1;
 }
 
 void DockSnappingManager::clearSnappedChain()
