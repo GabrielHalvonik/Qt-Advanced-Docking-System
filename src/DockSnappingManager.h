@@ -10,10 +10,8 @@
 #include <QObject>
 #include <QPoint>
 #include <QRect>
-
-    #include <QDebug>
-    #include <QApplication>
-    #include <QScreen>
+#include <QApplication>
+#include <QScreen>
 
 namespace ads
 {
@@ -60,7 +58,8 @@ private:
         
         bool isActive = false;
     public:
-        bool eventFilter(QObject*, QEvent* event) override {
+        bool eventFilter(QObject*, QEvent* event) override
+        {
             auto mouseEvent = dynamic_cast<QMouseEvent*>(event);
             if (mouseEvent != nullptr)
             {

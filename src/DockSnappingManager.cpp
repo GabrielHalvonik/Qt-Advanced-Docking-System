@@ -261,7 +261,7 @@ std::vector<CFloatingDockContainer*> DockSnappingManager::querySnappedChain(CDoc
                         for (const auto& candidateCorner : candidateCorners)
                         {
                             int distance = (currentCorner - candidateCorner).manhattanLength();
-                            if (distance <= SnapDistance)
+                            if (distance <= 1)
                             {
                                 isSnapped = true;
                                 break;
