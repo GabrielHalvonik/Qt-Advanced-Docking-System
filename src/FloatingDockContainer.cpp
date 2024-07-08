@@ -1046,9 +1046,10 @@ void CFloatingDockContainer::startDragging(const QPoint &DragStartMousePos, cons
     {
         DockSnappingManager::instance().draggingStarted(DragStartMousePos, this);
         d->IsSnapped = DockSnappingManager::instance().tryStoreSnappedChain(d->DockManager, this);
-
-        // DockSnappingManager::instance().cursorRestrictionFilter->setBoundsToCheck(screen()->geometry(), DockSnappingManager::instance().calculateSnappedBoundingBox(snappedDockGroup));
-        // QApplication::instance()->installEventFilter(DockSnappingManager::instance().cursorRestrictionFilter);
+    }
+    else
+    {
+        d->IsSnapped = false;
     }
     startFloating(DragStartMousePos, Size, DraggingFloatingWidget, MouseEventHandler);
 }
