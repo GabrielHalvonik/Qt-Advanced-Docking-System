@@ -9,6 +9,7 @@
 #include <QApplication>
 
 #include "DockManager.h"
+#include "FloatingHelper.h"
 
 namespace ads
 {
@@ -151,7 +152,7 @@ void DockSnappingManager::moveSnappedDockGroup(QWidget* owner, const QPoint& cur
     lastPosition = cursorPos;
 
     auto bounds = DockSnappingManager::instance().calculateSnappedBoundingBox(snappedDockGroup);
-    auto overhang = calculateOverhang(screen->geometry(), bounds.translated(offset));
+    auto overhang = FloatingHelper::calculateOverhang(screen->geometry(), bounds.translated(offset));
 
     QPoint delta { };
 
@@ -281,32 +282,6 @@ std::vector<CFloatingDockContainer*> DockSnappingManager::querySnappedChain(CDoc
     }
 
     return chain;
-}
-
-QPoint DockSnappingManager::calculateOverhang(const QRect& screenBounds, const QRect& widgetBounds)
-{
-    int overhangX = 0;
-    int overhangY = 0;
-
-    if (widgetBounds.left() < screenBounds.left())
-    {
-        overhangX = widgetBounds.left() - screenBounds.left();
-    }
-    else if (widgetBounds.right() > screenBounds.right())
-    {
-        overhangX = widgetBounds.right() - screenBounds.right();
-    }
-
-    if (widgetBounds.top() < screenBounds.top())
-    {
-        overhangY = widgetBounds.top() - screenBounds.top();
-    }
-    else if (widgetBounds.bottom() > screenBounds.bottom())
-    {
-        overhangY = widgetBounds.bottom() - screenBounds.bottom();
-    }
-
-    return QPoint(overhangX, overhangY);
 }
 
 QRect DockSnappingManager::calculateSnappedBoundingBox(std::vector<CFloatingDockContainer*>& containers) {

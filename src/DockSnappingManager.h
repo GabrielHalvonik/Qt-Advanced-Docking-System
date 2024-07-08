@@ -39,10 +39,9 @@ public:
     
 public:
     const int SnapDistance = 15;
-
+    
 private:
     DockSnappingManager();
-    QPoint calculateOverhang(const QRect& screenBounds, const QRect& widgetBounds);
     std::vector<CFloatingDockContainer*> querySnappedChain(CDockManager* manager, CFloatingDockContainer* target);
     
 private:

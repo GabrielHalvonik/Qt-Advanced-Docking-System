@@ -667,6 +667,8 @@ public:
      * widgets.
      */
     CDockWidget::DockWidgetFeatures globallyLockedDockWidgetFeatures() const;
+    
+    void moveSnappedDockGroup(QWidget* owner, const QPoint& cursorPos, const QPoint& offset, QScreen* screen);
 
     /**
      * Globally Lock features of all dock widgets to "freeze" the current

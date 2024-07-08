@@ -45,6 +45,7 @@
 #include "DockWidget.h"
 #include "DockOverlay.h"
 #include "DockSnappingManager.h"
+#include "FloatingHelper.h"
 
 #ifdef Q_OS_WIN
 #include <windows.h>
@@ -1080,7 +1081,10 @@ void CFloatingDockContainer::moveFloating()
     }
     else
     {
-        move(moveToPos);
+        auto cursorScreen = FloatingHelper::currentlyHoveredScreen();
+        auto overhang = FloatingHelper::calculateOverhang(cursorScreen->geometry(), geometry().translated(offset));
+        move(moveToPos - overhang);
+       
         DockSnappingManager::instance().clearSnappedChain();
     }
 

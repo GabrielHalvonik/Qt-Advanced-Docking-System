@@ -38,6 +38,7 @@ HEADERS += \
     DockManager.h \
     DockWidget.h \
     DockWidgetTab.h \ 
+	FloatingHelper.h \
     DockingStateReader.h \
     FloatingDockContainer.h \
     FloatingDragPreview.h \
@@ -79,7 +80,8 @@ SOURCES += \
     AutoHideSideBar.cpp \
     AutoHideTab.cpp \
     PushButton.cpp \
-    ResizeHandle.cpp
+    ResizeHandle.cpp \
+    FloatingHelper.cpp
 
 
 unix:!macx {
