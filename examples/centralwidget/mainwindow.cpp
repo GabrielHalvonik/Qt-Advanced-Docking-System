@@ -52,7 +52,7 @@ CMainWindow::CMainWindow(QWidget *parent)
     ToolPanel* table = new ToolPanel();
     CDockWidget* TableDockWidget = new CDockWidget("Table 1");
     TableDockWidget->setWidget(table);
-    TableDockWidget->setMinimumSizeHintMode(CDockWidget::MinimumSizeHintFromDockWidget);
+    TableDockWidget->setMinimumSizeHintMode(CDockWidget::MinimumSizeHintFromDockWidgetMinimumSize);
     TableDockWidget->resize(250, 150);
     TableDockWidget->setMinimumSize(200,150);
     auto TableArea = DockManager->addDockWidget(DockWidgetArea::LeftDockWidgetArea, TableDockWidget);
@@ -61,7 +61,7 @@ CMainWindow::CMainWindow(QWidget *parent)
     table = new ToolPanel();
     TableDockWidget = new CDockWidget("Table 2");
     TableDockWidget->setWidget(table);
-    TableDockWidget->setMinimumSizeHintMode(CDockWidget::MinimumSizeHintFromDockWidget);
+    TableDockWidget->setMinimumSizeHintMode(CDockWidget::MinimumSizeHintFromDockWidgetMinimumSize);
     TableDockWidget->resize(250, 150);
     TableDockWidget->setMinimumSize(200,150);
     DockManager->addDockWidget(DockWidgetArea::BottomDockWidgetArea, TableDockWidget, TableArea);
@@ -70,7 +70,7 @@ CMainWindow::CMainWindow(QWidget *parent)
     ToolPanel* propertiesTable = new ToolPanel();
     CDockWidget* PropertiesDockWidget = new CDockWidget("Properties");
     PropertiesDockWidget->setWidget(propertiesTable);
-    PropertiesDockWidget->setMinimumSizeHintMode(CDockWidget::MinimumSizeHintFromDockWidget);
+    PropertiesDockWidget->setMinimumSizeHintMode(CDockWidget::MinimumSizeHintFromDockWidgetMinimumSize);
     PropertiesDockWidget->resize(250, 150);
     PropertiesDockWidget->setMinimumSize(200,150);
     DockManager->addDockWidget(DockWidgetArea::RightDockWidgetArea, PropertiesDockWidget, CentralDockArea);
