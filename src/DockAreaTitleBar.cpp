@@ -345,7 +345,7 @@ CDockAreaTitleBar::CDockAreaTitleBar(CDockAreaWidget* parent) :
 	d->createTabBar();
 	d->createButtons();
 	d->createAutoHideTitleLabel();
-
+    
     setFocusPolicy(Qt::NoFocus);
 }
 
@@ -863,6 +863,39 @@ void CDockAreaTitleBar::showAutoHideControls(bool Show)
 bool CDockAreaTitleBar::isAutoHide() const
 {
 	return d->DockArea && d->DockArea->isAutoHide();
+}
+
+bool CDockAreaTitleBar::event(QEvent* event)
+{
+    bool eventHandled = false;
+    
+    if (event != nullptr && d->DockArea != nullptr)
+    {
+        if (d->DockArea->dockContainer() != nullptr)
+        {
+            if (auto container = dynamic_cast<CFloatingDockContainer*>(d->DockArea->dockContainer()->floatingWidget()); container != nullptr)
+            {
+                if (auto mouseEvent = dynamic_cast<QMouseEvent*>(event); mouseEvent != nullptr && event->type() == QEvent::MouseButtonPress)
+                {
+                    container->startDragging(mouseEvent->pos(), container->size(), {});
+                    eventHandled = true;
+                }
+                else if (event->type() == QEvent::MouseMove)
+                {
+                    container->moveFloating();
+                    eventHandled = true;
+                }
+                else if (event->type() == QEvent::MouseButtonRelease)
+                {
+                    container->finishDragging();
+                    eventHandled = true;
+                }
+            }
+        }
+    }
+    if (eventHandled) return true;
+    
+    return QFrame::event(event);
 }
 
 

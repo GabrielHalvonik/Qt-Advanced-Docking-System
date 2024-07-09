@@ -243,6 +243,9 @@ public:
 	 * Returns true, if the auto hide controls are visible
 	 */
 	bool isAutoHide() const;
+    
+public:
+    bool event(QEvent* event) override;
 
 Q_SIGNALS:
 	/**

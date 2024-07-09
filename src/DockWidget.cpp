@@ -900,22 +900,22 @@ bool CDockWidget::eventFilter(QObject *watched, QEvent *event)
     }
 
     bool eventHandled = false;
-
+    
     if (auto container = floatingDockContainer(); container != nullptr)
     {
         if (auto mouseEvent = dynamic_cast<QMouseEvent*>(event); mouseEvent != nullptr && event->type() == QEvent::MouseButtonPress)
         {
-            floatingDockContainer()->startDragging(mouseEvent->pos(), container->size(), {});
+            container->startDragging(mouseEvent->pos(), container->size(), {});
             eventHandled = true;
         }
         else if (event->type() == QEvent::MouseMove)
         {
-            floatingDockContainer()->moveFloating();
+            container->moveFloating();
             eventHandled = true;
         }
         else if (event->type() == QEvent::MouseButtonRelease)
         {
-            floatingDockContainer()->finishDragging();
+            container->finishDragging();
             eventHandled = true;
         }
     }
