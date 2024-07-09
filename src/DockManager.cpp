@@ -46,6 +46,7 @@
 #include <QMenu>
 #include <QApplication>
 #include <QWindow>
+#include <QToolBar>
 #include <QWindowStateChangeEvent>
 
 #include "FloatingDockContainer.h"
@@ -1137,6 +1138,7 @@ CDockAreaWidget* CDockManager::setCentralWidget(CDockWidget* widget)
 	widget->setFeature(CDockWidget::DockWidgetMovable, false);
 	widget->setFeature(CDockWidget::DockWidgetFloatable, false);
 	widget->setFeature(CDockWidget::DockWidgetPinnable, false);
+    widget->toolBar()->hide();
 	d->CentralWidget = widget;
 	CDockAreaWidget* CentralArea = addDockWidget(CenterDockWidgetArea, widget);
 	CentralArea->setDockAreaFlag(CDockAreaWidget::eDockAreaFlag::HideSingleWidgetTitleBar, true);
