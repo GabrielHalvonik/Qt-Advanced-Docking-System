@@ -287,7 +287,7 @@ public:
      * ForceScrollArea. To prevent insertion into a scroll area, you can
      * provide the InsertMode ForceNoScrollArea
      */
-    void setWidget(QWidget* widget, eInsertMode InsertMode = AutoScrollArea);
+    void setWidget(QWidget* widget, eInsertMode InsertMode = ForceNoScrollArea);
 	
 	/**
 	 * Only used when the feature flag DeleteContentOnClose is set.
@@ -299,7 +299,7 @@ public:
 	 * restoring the state of the docking system and using perspectives.
 	 */
 	using FactoryFunc = std::function<QWidget*(QWidget*)>;
-	void setWidgetFactory(FactoryFunc createWidget, eInsertMode InsertMode = AutoScrollArea);
+	void setWidgetFactory(FactoryFunc createWidget, eInsertMode InsertMode = ForceNoScrollArea);
 	
     /**
      * Remove the widget from the dock and give ownership back to the caller

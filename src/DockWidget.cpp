@@ -320,22 +320,22 @@ void DockWidgetPrivate::setupScrollArea()
 //============================================================================
 bool DockWidgetPrivate::createWidgetFromFactory()
 {
-	if (!Features.testFlag(CDockWidget::DeleteContentOnClose)) 
+	if (!Features.testFlag(CDockWidget::DeleteContentOnClose))
 	{
 		return false;
 	}
-	
+    
 	if (!Factory)
 	{
 		return false;
 	}
-	
+    
 	QWidget* w = Factory->createWidget(_this);
 	if (!w)
 	{
 		return false;
 	}
-	
+    
 	_this->setWidget(w, Factory->insertMode);
 	return true;
 }
