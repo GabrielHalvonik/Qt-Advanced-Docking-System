@@ -152,11 +152,11 @@ void DockSnappingManager::moveSnappedDockGroup(QWidget* owner, const QPoint& cur
     lastPosition = cursorPos;
 
     auto bounds = DockSnappingManager::instance().calculateSnappedBoundingBox(snappedDockGroup);
-    auto overhang = FloatingHelper::calculateOverhang(screen->geometry(), bounds.translated(offset));
+    auto overhang = FloatingHelper::calculateOverhang(screen->availableGeometry(), bounds.translated(offset));
 
     QPoint delta { };
 
-    if (!screen->geometry().contains(bounds.translated(offset)))
+    if (!screen->availableGeometry().contains(bounds.translated(offset)))
     {
         for (auto item : snappedDockGroup)
         {

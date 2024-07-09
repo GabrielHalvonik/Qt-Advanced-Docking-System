@@ -1082,7 +1082,7 @@ void CFloatingDockContainer::moveFloating()
     else
     {
         auto cursorScreen = FloatingHelper::currentlyHoveredScreen();
-        auto overhang = FloatingHelper::calculateOverhang(cursorScreen->geometry(), geometry().translated(offset));
+        auto overhang = FloatingHelper::calculateOverhang(cursorScreen->availableGeometry(), geometry().translated(offset));
         move(moveToPos - overhang);
        
         DockSnappingManager::instance().clearSnappedChain();

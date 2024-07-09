@@ -3,7 +3,6 @@
 #include <QCursor>
 #include <QScreen>
 #include <QGuiApplication>
-#include "QtCore/qdebug.h"
 
 namespace ads
 {
@@ -46,11 +45,9 @@ QScreen* FloatingHelper::currentlyHoveredScreen()
         int right = screenGeometry.right();
         int top = screenGeometry.top();
         int bottom = screenGeometry.bottom();
-        // qInfo() << "yy " << cursorPos.y() << " : btm " << right;
         if (cursorPos.x() >= left && cursorPos.x() <= right + 1 &&
             cursorPos.y() >= top && cursorPos.y() <= bottom + 1)
         {
-            // qInfo() << screenGeometry << " contains " << cursorPos;
             return screen;
         }
     }
