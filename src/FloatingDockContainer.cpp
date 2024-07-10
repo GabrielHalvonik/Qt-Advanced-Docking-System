@@ -38,6 +38,7 @@
 #include <QElapsedTimer>
 #include <QTime>
 #include <QScreen>
+#include <QSizeGrip>
 
 #include "DockContainerWidget.h"
 #include "DockAreaWidget.h"
@@ -727,10 +728,13 @@ CFloatingDockContainer::CFloatingDockContainer(CDockManager *DockManager) :
     l->setContentsMargins(0, 0, 0, 0);
     l->setSpacing(0);
     setLayout(l);
-    l->addWidget(d->DockContainer);
+    l->addWidget(d->DockContainer, 10);
+    
+    auto grip = new QSizeGrip(this);
+    l->addWidget(grip, 0, Qt::AlignBottom | Qt::AlignRight);
 #endif
 
-    setWindowFlags(Qt::Tool | Qt::FramelessWindowHint);
+    setWindowFlags(Qt::Tool | Qt::CustomizeWindowHint);
     DockManager->registerFloatingWidget(this);
 }
 
