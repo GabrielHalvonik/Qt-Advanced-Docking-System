@@ -6,7 +6,6 @@
 ToolPanel::ToolPanel()
 {
     layout = new QFormLayout();
-    layout->setContentsMargins(8, 8, 8, 8);
 
     for (int i = 0; i < 10; ++i) {
         auto slider = new QSlider();

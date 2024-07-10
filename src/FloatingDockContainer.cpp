@@ -728,10 +728,8 @@ CFloatingDockContainer::CFloatingDockContainer(CDockManager *DockManager) :
     l->setContentsMargins(0, 0, 0, 0);
     l->setSpacing(0);
     setLayout(l);
-    l->addWidget(d->DockContainer, 10);
-    
-    auto grip = new QSizeGrip(this);
-    l->addWidget(grip, 0, Qt::AlignBottom | Qt::AlignRight);
+    l->addWidget(d->DockContainer, 0);
+
 #endif
 
     setWindowFlags(Qt::Tool | Qt::CustomizeWindowHint);
@@ -970,7 +968,19 @@ void CFloatingDockContainer::closeEvent(QCloseEvent *event)
 //============================================================================
 void CFloatingDockContainer::hideEvent(QHideEvent *event)
 {
+    // qInfo() << "hide";
+    for (auto dock : dockWidgets())
+    {
+        if (grip != nullptr)
+        {
+            dock->layout()->removeWidget(grip);
+            grip->hide();
+            delete grip;
+            grip = nullptr;
+        }
+    }
     Super::hideEvent(event);
+    
     if (event->spontaneous())
     {
         return;
@@ -1000,7 +1010,19 @@ void CFloatingDockContainer::hideEvent(QHideEvent *event)
 //============================================================================
 void CFloatingDockContainer::showEvent(QShowEvent *event)
 {
+    // qInfo() << "show";
     Super::showEvent(event);
+    
+    if (grip == nullptr)
+    {
+        grip = new QSizeGrip(this);
+    }
+    
+    for (auto dock : dockWidgets())
+    {
+        dynamic_cast<QBoxLayout*>(dock->layout())->addWidget(grip, 0, Qt::AlignBottom | Qt::AlignRight);
+    }
+
 #if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
     if (CDockManager::testConfigFlag(CDockManager::FocusHighlighting))
     {

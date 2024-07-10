@@ -179,6 +179,8 @@ protected Q_SLOTS:
 
 public:
 	using Super = QFrame;
+    
+    const int DockMarginSize = 4;
 
 	/**
 	 * Dock area related flags

@@ -436,12 +436,13 @@ CDockAreaWidget::CDockAreaWidget(CDockManager* DockManager, CDockContainerWidget
 {
 	d->DockManager = DockManager;
 	d->Layout = new QBoxLayout(QBoxLayout::TopToBottom);
-	d->Layout->setContentsMargins(0, 0, 0, 0);
 	d->Layout->setSpacing(0);
+    
 	setLayout(d->Layout);
 
 	d->createTitleBar();
 	d->ContentsLayout = new DockAreaLayout(d->Layout);
+    
 	if (d->DockManager)
 	{
 		Q_EMIT d->DockManager->dockAreaCreated(this);
@@ -503,6 +504,14 @@ void CDockAreaWidget::setAutoHideDockContainer(CAutoHideDockContainer* AutoHideD
 void CDockAreaWidget::addDockWidget(CDockWidget* DockWidget)
 {
 	insertDockWidget(d->ContentsLayout->count(), DockWidget);
+    if (isCentralWidgetArea())
+    {
+        d->Layout->setContentsMargins(0, 0, 0, 0);
+    }
+    else
+    {
+        d->Layout->setContentsMargins(DockMarginSize, DockMarginSize, DockMarginSize, DockMarginSize);
+    }
 }
 
 
@@ -527,7 +536,14 @@ void CDockAreaWidget::insertDockWidget(int index, CDockWidget* DockWidget,
 	d->TitleBar->autoHideTitleLabel()->setText(DockWidget->windowTitle());
 	DockWidget->setProperty(INDEX_PROPERTY, index);
 	d->MinSizeHint.setHeight(qMax(d->MinSizeHint.height(), DockWidget->minimumSizeHint().height()));
-	d->MinSizeHint.setWidth(qMax(d->MinSizeHint.width(), DockWidget->minimumSizeHint().width()));
+    if (isCentralWidgetArea())
+    {
+        d->MinSizeHint.setWidth(qMax(d->MinSizeHint.width(), DockWidget->minimumSizeHint().width()));
+    }
+    else
+    {
+        d->MinSizeHint.setWidth(qMax(d->MinSizeHint.width(), DockWidget->minimumSizeHint().width() + DockMarginSize * 2));
+    }
 	if (Activate)
 	{
 		setCurrentIndex(index);

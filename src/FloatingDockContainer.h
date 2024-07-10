@@ -41,7 +41,9 @@
 #define tFloatingWidgetBase QWidget
 #endif
 
+class QSizeGrip;
 class CDockingStateReader;
+
 
 namespace ads
 {
@@ -106,6 +108,9 @@ class ADS_EXPORT CFloatingDockContainer : public tFloatingWidgetBase, public IFl
 	Q_OBJECT
 private:
 	FloatingDockContainerPrivate* d; ///< private data (pimpl)
+    
+    QSizeGrip* grip {};
+    
     friend struct FloatingDockContainerPrivate;
 	friend class CDockManager;
 	friend struct DockManagerPrivate;
