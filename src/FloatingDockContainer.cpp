@@ -968,7 +968,6 @@ void CFloatingDockContainer::closeEvent(QCloseEvent *event)
 //============================================================================
 void CFloatingDockContainer::hideEvent(QHideEvent *event)
 {
-    // qInfo() << "hide";
     for (auto dock : dockWidgets())
     {
         if (grip != nullptr)
@@ -1010,17 +1009,12 @@ void CFloatingDockContainer::hideEvent(QHideEvent *event)
 //============================================================================
 void CFloatingDockContainer::showEvent(QShowEvent *event)
 {
-    // qInfo() << "show";
     Super::showEvent(event);
     
     if (grip == nullptr)
     {
         grip = new QSizeGrip(this);
-    }
-    
-    for (auto dock : dockWidgets())
-    {
-        dynamic_cast<QBoxLayout*>(dock->layout())->addWidget(grip, 0, Qt::AlignBottom | Qt::AlignRight);
+        dynamic_cast<QBoxLayout*>(layout())->addWidget(grip, 0, Qt::AlignBottom | Qt::AlignRight);
     }
 
 #if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
