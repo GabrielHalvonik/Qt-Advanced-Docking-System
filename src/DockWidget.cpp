@@ -34,8 +34,6 @@
 #include "DockWidgetTab.h"
 #include "DockWidget.h"
 
-#include <iostream>
-
 #include <QBoxLayout>
 #include <QAction>
 #include <QSplitter>
@@ -909,10 +907,8 @@ bool CDockWidget::eventFilter(QObject *watched, QEvent *event)
         {
             d->DockManager->addDockWidgetFloating(this);
         }
-        return false;
     }
-    
-    if (auto container = floatingDockContainer(); container != nullptr)
+    else if (auto container = floatingDockContainer(); container != nullptr)
     {
         if (auto mouseEvent = dynamic_cast<QMouseEvent*>(event); mouseEvent != nullptr && event->type() == QEvent::MouseButtonPress)
         {
