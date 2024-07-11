@@ -903,6 +903,15 @@ bool CDockWidget::eventFilter(QObject *watched, QEvent *event)
 
     bool eventHandled = false;
     
+    if (isTabbed())
+    {
+        if (auto mouseEvent = dynamic_cast<QMouseEvent*>(event); mouseEvent != nullptr && event->type() == QEvent::MouseButtonPress)
+        {
+            d->DockManager->addDockWidgetFloating(this);
+        }
+        return false;
+    }
+    
     if (auto container = floatingDockContainer(); container != nullptr)
     {
         if (auto mouseEvent = dynamic_cast<QMouseEvent*>(event); mouseEvent != nullptr && event->type() == QEvent::MouseButtonPress)
