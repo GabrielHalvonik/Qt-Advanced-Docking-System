@@ -197,21 +197,21 @@ DockManagerPrivate::DockManagerPrivate(CDockManager* _public) :
 //============================================================================
 void DockManagerPrivate::loadStylesheet()
 {
-	initResource();
-	QString Result;
-	QString FileName = ":ads/stylesheets/";
-	FileName += CDockManager::testConfigFlag(CDockManager::FocusHighlighting)
-		? "focus_highlighting" : "default";
-#if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
-    FileName += "_linux";
-#endif
-    FileName += ".css";
-	QFile StyleSheetFile(FileName);
-	StyleSheetFile.open(QIODevice::ReadOnly);
-	QTextStream StyleSheetStream(&StyleSheetFile);
-	Result = StyleSheetStream.readAll();
-	StyleSheetFile.close();
-	_this->setStyleSheet(Result);
+// 	initResource();
+// 	QString Result;
+// 	QString FileName = ":ads/stylesheets/";
+// 	FileName += CDockManager::testConfigFlag(CDockManager::FocusHighlighting)
+// 		? "focus_highlighting" : "default";
+// #if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
+//     FileName += "_linux";
+// #endif
+//     FileName += ".css";
+// 	QFile StyleSheetFile(FileName);
+// 	StyleSheetFile.open(QIODevice::ReadOnly);
+// 	QTextStream StyleSheetStream(&StyleSheetFile);
+// 	Result = StyleSheetStream.readAll();
+// 	StyleSheetFile.close();
+// 	_this->setStyleSheet(Result);
 }
 
 
