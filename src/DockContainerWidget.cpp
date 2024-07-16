@@ -60,7 +60,6 @@
 #include "AutoHideTab.h"
 
 #include <functional>
-#include <iostream>
 
 #if QT_VERSION < 0x050900
 

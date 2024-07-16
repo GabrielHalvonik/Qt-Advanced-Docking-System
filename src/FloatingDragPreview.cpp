@@ -8,7 +8,7 @@
 //============================================================================
 //                                   INCLUDES
 //============================================================================
-#include <AutoHideDockContainer.h>
+#include "AutoHideDockContainer.h"
 #include "FloatingDragPreview.h"
 
 #include <QEvent>

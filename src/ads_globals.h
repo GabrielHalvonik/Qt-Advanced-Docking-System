@@ -38,8 +38,6 @@
 #include <QStyle>
 #include <QMouseEvent>
 
-#include <iostream>
-
 #if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
 #include <xcb/xcb.h>
 #endif

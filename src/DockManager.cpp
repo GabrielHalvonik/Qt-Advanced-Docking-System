@@ -28,7 +28,7 @@
 //============================================================================
 //                                   INCLUDES
 //============================================================================
-#include <AutoHideDockContainer.h>
+#include "AutoHideDockContainer.h"
 #include "DockWidgetTab.h"
 #include "DockManager.h"
 

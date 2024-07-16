@@ -28,8 +28,6 @@
 //============================================================================
 #include "FloatingWidgetTitleBar.h"
 
-#include <iostream>
-
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QToolButton>

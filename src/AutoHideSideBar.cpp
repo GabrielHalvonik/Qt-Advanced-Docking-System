@@ -40,7 +40,6 @@
 #include "DockFocusController.h"
 #include "AutoHideDockContainer.h"
 #include "DockAreaWidget.h"
-#include "DockingStateReader.h"
 #include "AutoHideTab.h"
 
 namespace ads

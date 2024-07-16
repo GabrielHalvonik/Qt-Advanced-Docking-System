@@ -54,9 +54,6 @@
 #include "DockFocusController.h"
 #include "ElidingLabel.h"
 #include "AutoHideDockContainer.h"
-#include "IconProvider.h"
-
-#include <iostream>
 
 namespace ads
 {
@@ -263,7 +260,7 @@ void DockAreaTitleBarPrivate::createAutoHideTitleLabel()
 void DockAreaTitleBarPrivate::createTabBar()
 {
 	TabBar = componentsFactory()->createDockAreaTabBar(DockArea);
-    TabBar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+    // TabBar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 	Layout->addWidget(TabBar);
 	_this->connect(TabBar, SIGNAL(tabClosed(int)), SLOT(markTabsMenuOutdated()));
 	_this->connect(TabBar, SIGNAL(tabOpened(int)), SLOT(markTabsMenuOutdated()));
@@ -873,9 +870,9 @@ bool CDockAreaTitleBar::event(QEvent* event)
     {
         if (d->DockArea->dockContainer() != nullptr)
         {
-            if (auto container = dynamic_cast<CFloatingDockContainer*>(d->DockArea->dockContainer()->floatingWidget()); container != nullptr)
+            if (auto container = qobject_cast<CFloatingDockContainer*>(d->DockArea->dockContainer()->floatingWidget()); container != nullptr)
             {
-                if (auto mouseEvent = dynamic_cast<QMouseEvent*>(event); mouseEvent != nullptr && event->type() == QEvent::MouseButtonPress)
+                if (auto mouseEvent = static_cast<QMouseEvent*>(event); mouseEvent != nullptr && event->type() == QEvent::MouseButtonPress)
                 {
                     container->startDragging(mouseEvent->pos(), container->size(), {});
                     eventHandled = true;

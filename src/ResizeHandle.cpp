@@ -17,8 +17,6 @@
 #include <QRubberBand>
 #include <QPointer>
 
-#include "ads_globals.h"
-
 namespace ads
 {
 /**

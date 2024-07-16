@@ -28,8 +28,8 @@
 //============================================================================
 //                                   INCLUDES
 //============================================================================
-#include <AutoHideDockContainer.h>
-#include <AutoHideTab.h>
+#include "AutoHideDockContainer.h"
+#include "AutoHideTab.h"
 #include "DockAreaWidget.h"
 
 #include <QStackedLayout>
@@ -41,13 +41,13 @@
 #include <QMenu>
 #include <QXmlStreamWriter>
 #include <QList>
+#include <QPointer>
 
 #include "ElidingLabel.h"
 #include "DockContainerWidget.h"
 #include "DockWidget.h"
 #include "FloatingDockContainer.h"
 #include "DockManager.h"
-#include "DockOverlay.h"
 #include "DockAreaTabBar.h"
 #include "DockSplitter.h"
 #include "DockAreaTitleBar.h"

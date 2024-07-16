@@ -43,8 +43,6 @@
 #include "DockManager.h"
 #include "DockAreaTabBar.h"
 
-#include <iostream>
-
 namespace ads
 {
 static const int AutoHideAreaWidth = 32;

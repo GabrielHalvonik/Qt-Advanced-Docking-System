@@ -28,9 +28,9 @@
 //============================================================================
 //                                   INCLUDES
 //============================================================================
-#include <AutoHideDockContainer.h>
-#include <AutoHideSideBar.h>
-#include <AutoHideTab.h>
+#include "AutoHideDockContainer.h"
+#include "AutoHideSideBar.h"
+#include "AutoHideTab.h"
 #include "DockWidgetTab.h"
 #include "DockWidget.h"
 
@@ -903,14 +903,14 @@ bool CDockWidget::eventFilter(QObject *watched, QEvent *event)
     
     if (isTabbed())
     {
-        if (auto mouseEvent = dynamic_cast<QMouseEvent*>(event); mouseEvent != nullptr && event->type() == QEvent::MouseButtonPress)
+        if (auto mouseEvent = static_cast<QMouseEvent*>(event); mouseEvent != nullptr && event->type() == QEvent::MouseButtonPress)
         {
             d->DockManager->addDockWidgetFloating(this);
         }
     }
     else if (auto container = floatingDockContainer(); container != nullptr)
     {
-        if (auto mouseEvent = dynamic_cast<QMouseEvent*>(event); mouseEvent != nullptr && event->type() == QEvent::MouseButtonPress)
+        if (auto mouseEvent = static_cast<QMouseEvent*>(event); mouseEvent != nullptr && event->type() == QEvent::MouseButtonPress)
         {
             container->startDragging(mouseEvent->pos(), container->size(), {});
             eventHandled = true;

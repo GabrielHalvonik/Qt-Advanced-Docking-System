@@ -40,13 +40,9 @@
 
 #include "FloatingDockContainer.h"
 #include "DockAreaWidget.h"
-#include "DockOverlay.h"
 #include "DockManager.h"
 #include "DockWidget.h"
 #include "DockWidgetTab.h"
-
-#include <iostream>
-
 
 namespace ads
 {
@@ -131,7 +127,7 @@ CDockAreaTabBar::CDockAreaTabBar(CDockAreaWidget* parent) :
 {
 	d->DockArea = parent;
 	setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-	setFrameStyle(QFrame::NoFrame);
+	setFrameStyle(QFrame::StyledPanel);
 	setWidgetResizable(true);
 	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -144,6 +140,9 @@ CDockAreaTabBar::CDockAreaTabBar(CDockAreaWidget* parent) :
 	d->TabsLayout->setSpacing(0);
 	d->TabsLayout->addStretch(1);
 	d->TabsContainerWidget->setLayout(d->TabsLayout);
+    
+    // d->DockArea->setStyleSheet("QWidget { background-color: red; }");
+    // d->TabsContainerWidget->setStyleSheet("QWidget { background-color: red; }");
 	setWidget(d->TabsContainerWidget);
 
     setFocusPolicy(Qt::NoFocus);

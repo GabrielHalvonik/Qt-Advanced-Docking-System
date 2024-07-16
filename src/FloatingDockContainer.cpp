@@ -1014,7 +1014,7 @@ void CFloatingDockContainer::showEvent(QShowEvent *event)
     if (grip == nullptr)
     {
         grip = new QSizeGrip(this);
-        dynamic_cast<QBoxLayout*>(layout())->addWidget(grip, 0, Qt::AlignBottom | Qt::AlignRight);
+        qobject_cast<QBoxLayout*>(layout())->addWidget(grip, 0, Qt::AlignBottom | Qt::AlignRight);
     }
 
 #if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)

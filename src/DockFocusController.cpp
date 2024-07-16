@@ -8,11 +8,8 @@
 //============================================================================
 //                                   INCLUDES
 //============================================================================
-#include <AutoHideTab.h>
+#include "AutoHideTab.h"
 #include "DockFocusController.h"
-
-#include <algorithm>
-#include <iostream>
 
 #include <QPointer>
 #include <QApplication>

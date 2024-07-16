@@ -16,10 +16,10 @@ namespace ads
 
 DockSnappingManager::DockSnappingManager()
 {
-    // QObject::connect(dynamic_cast<QGuiApplication*>(QApplication::instance()), &QGuiApplication::screenAdded, [](QScreen* screen){
+    // QObject::connect(qobject_cast<QGuiApplication*>(QApplication::instance()), &QGuiApplication::screenAdded, [](QScreen* screen){
     //     qInfo() << "screen added: " << screen->name();
     // });
-    // QObject::connect(dynamic_cast<QGuiApplication*>(QApplication::instance()), &QGuiApplication::screenRemoved, [](QScreen* screen){
+    // QObject::connect(qobject_cast<QGuiApplication*>(QApplication::instance()), &QGuiApplication::screenRemoved, [](QScreen* screen){
     //     qInfo() << "screen removed: " << screen->name();
     // });
 }
