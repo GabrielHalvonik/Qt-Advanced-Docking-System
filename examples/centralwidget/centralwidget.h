@@ -9,7 +9,7 @@ class CentralWidget : public QWidget
 public:
     CentralWidget()
     {
-        setStyleSheet("QWidget { background-color: white; }");
+        setStyleSheet("QWidget { background-color: gray; }");
     }
 };
 

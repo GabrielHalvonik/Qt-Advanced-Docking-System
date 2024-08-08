@@ -571,6 +571,11 @@ void CDockWidget::setDockManager(CDockManager* DockManager)
 	{
 		return;
 	}
+    
+    if (d->Widget != nullptr && d->Widget->parent() != dockManager()->centralWidget())
+    {
+        createDefaultToolBar()->installEventFilter(this);
+    }
 
 	if (ToolBarStyleFromDockManager == d->ToolBarStyleSource)
 	{

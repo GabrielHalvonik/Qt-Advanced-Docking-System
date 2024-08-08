@@ -511,7 +511,7 @@ CDockManager::CDockManager(QWidget *parent) :
 	}
 
 	d->ViewMenu = new QMenu(tr("Show View"), this);
-	d->DockAreaOverlay = new CDockOverlay(this, CDockOverlay::ModeDockAreaOverlay);
+	d->DockAreaOverlay = new CDockOverlay(this, CDockOverlay::ModeContainerOverlay); // ModeDockAreaOverlay
 	d->ContainerOverlay = new CDockOverlay(this, CDockOverlay::ModeContainerOverlay);
 	d->Containers.append(this);
 	d->loadStylesheet();

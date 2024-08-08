@@ -47,6 +47,7 @@ private:
 	DockOverlayPrivate* d; //< private data class
 	friend struct DockOverlayPrivate;
 	friend class DockOverlayCross;
+    friend class CDockOverlayCross;
 
 public:
 	using Super = QFrame;

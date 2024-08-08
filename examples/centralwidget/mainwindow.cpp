@@ -37,6 +37,7 @@ CMainWindow::CMainWindow(QWidget *parent)
     CDockManager::setConfigFlag(CDockManager::OpaqueSplitterResize, true);
     CDockManager::setConfigFlag(CDockManager::XmlCompressionEnabled, false);
     CDockManager::setConfigFlag(CDockManager::FocusHighlighting, true);
+    CDockManager::setConfigFlag(CDockManager::DragPreviewIsDynamic, false);
     DockManager = new CDockManager(this);
 
     // Set central widget
@@ -54,7 +55,7 @@ CMainWindow::CMainWindow(QWidget *parent)
     TableDockWidget->setWidget(table);
     TableDockWidget->setMinimumSizeHintMode(CDockWidget::MinimumSizeHintFromDockWidgetMinimumSize);
     TableDockWidget->resize(250, 150);
-    TableDockWidget->setMinimumSize(200,150);
+    // TableDockWidget->setMinimumSize(200,150);
     auto TableArea = DockManager->addDockWidget(DockWidgetArea::LeftDockWidgetArea, TableDockWidget);
     ui->menuView->addAction(TableDockWidget->toggleViewAction());
 
@@ -63,7 +64,7 @@ CMainWindow::CMainWindow(QWidget *parent)
     TableDockWidget->setWidget(table);
     TableDockWidget->setMinimumSizeHintMode(CDockWidget::MinimumSizeHintFromDockWidgetMinimumSize);
     TableDockWidget->resize(250, 150);
-    TableDockWidget->setMinimumSize(200,150);
+    // TableDockWidget->setMinimumSize(200,150);
     DockManager->addDockWidget(DockWidgetArea::BottomDockWidgetArea, TableDockWidget, TableArea);
     ui->menuView->addAction(TableDockWidget->toggleViewAction());
 
@@ -72,7 +73,7 @@ CMainWindow::CMainWindow(QWidget *parent)
     PropertiesDockWidget->setWidget(propertiesTable);
     PropertiesDockWidget->setMinimumSizeHintMode(CDockWidget::MinimumSizeHintFromDockWidgetMinimumSize);
     PropertiesDockWidget->resize(250, 150);
-    PropertiesDockWidget->setMinimumSize(200,150);
+    // PropertiesDockWidget->setMinimumSize(200,150);
     DockManager->addDockWidget(DockWidgetArea::RightDockWidgetArea, PropertiesDockWidget, CentralDockArea);
     ui->menuView->addAction(PropertiesDockWidget->toggleViewAction());
 

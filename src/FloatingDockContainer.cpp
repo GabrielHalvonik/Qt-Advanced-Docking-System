@@ -451,13 +451,15 @@ struct FloatingDockContainerPrivate
         {
             setWindowTitle(floatingContainersTitle());
         }
-
+        
         // reflect CurrentWidget's icon if configured to do so, otherwise display application icon as window icon
-        QIcon CurrentWidgetIcon = CurrentWidget->icon();
-        if (testConfigFlag(CDockManager::FloatingContainerHasWidgetIcon)
-            && !CurrentWidgetIcon.isNull())
+        if (testConfigFlag(CDockManager::FloatingContainerHasWidgetIcon))
         {
-            _this->setWindowIcon(CurrentWidget->icon());
+            QIcon CurrentWidgetIcon = CurrentWidget->icon();
+            if (CurrentWidgetIcon.isNull())
+            {
+                _this->setWindowIcon(CurrentWidget->icon());
+            }
         }
         else
         {
@@ -500,7 +502,7 @@ void FloatingDockContainerPrivate::titleMouseReleaseEvent()
     {
         return;
     }
-
+    
     if (DockManager->dockAreaOverlay()->dropAreaUnderCursor() != InvalidDockWidgetArea
         || DockManager->containerOverlay()->dropAreaUnderCursor() != InvalidDockWidgetArea)
     {
