@@ -23,5 +23,6 @@
         <file>images/minimize-button.svg</file>
         <file>images/minimize-button-focused.svg</file>
         <file>images/vs-pin-button-disabled.svg</file>
+        <file>images/dock_indicator.png</file>
     </qresource>
 </RCC>
