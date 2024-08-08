@@ -787,6 +787,12 @@ bool CDockWidgetTab::event(QEvent *e)
 	return Super::event(e);
 }
 
+//============================================================================
+eDragState CDockWidgetTab::dragState() const
+{
+    return d->DragState;
+}
+
 
 //============================================================================
 void CDockWidgetTab::onDockWidgetFeaturesChanged()

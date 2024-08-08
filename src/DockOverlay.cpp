@@ -226,12 +226,6 @@ struct DockOverlayCrossPrivate
             l->setPixmap(pixmap);
         }
         
-        // l->setStyleSheet("QLabel { border-radius: 8px; background-color: red; }");
-        
-
-        
-        // l->setPixmap(loadSvgIcon("/Users/gabrielhalvonik/Documents/dock_indicator_active.svg", {40, 40}).pixmap(QSize{40, 40}));
-		// l->setPixmap(createHighDpiDropIndicatorPixmap(size, DockWidgetArea, Mode));
 		l->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint);
 		l->setAttribute(Qt::WA_TranslucentBackground);
 		l->setProperty("dockWidgetArea", DockWidgetArea);
