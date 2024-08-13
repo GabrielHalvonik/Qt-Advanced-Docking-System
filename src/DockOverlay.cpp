@@ -466,10 +466,9 @@ void CDockOverlay::setAllowedAreas(DockWidgetAreas areas)
 {
 	if (areas == d->AllowedAreas)
 	{
-		return;
+        return;
 	}
 	d->AllowedAreas = areas;
-	d->Cross->reset();
 }
 
 
@@ -488,14 +487,30 @@ void CDockOverlay::setAllowedArea(DockWidgetArea area, bool Enable)
 //============================================================================
 DockWidgetAreas CDockOverlay::allowedAreas() const
 {
+    DockWidgetAreas result = DockWidgetArea::InvalidDockWidgetArea;
+    
     if (qobject_cast<CDockManager*>(d->TargetWidget.data()))
     {
-        return DockWidgetArea::NoDockWidgetArea;
+        result = DockWidgetArea::NoDockWidgetArea;
     }
-    if (auto area = qobject_cast<CDockAreaWidget*>(d->TargetWidget.data()); area && area->isCentralWidgetArea())
+    else if (auto area = qobject_cast<CDockAreaWidget*>(d->TargetWidget.data()); area)
     {
-        return DockWidgetArea::OuterDockAreas;
+        if (area->isCentralWidgetArea())
+        {
+            result = DockWidgetArea::OuterDockAreas;
+        }
+        else if (auto container = area->dockContainer(); container &&container->isFloating())
+        {
+            result = DockWidgetArea::CenterDockWidgetArea;
+        }
     }
+    
+    if (result == DockWidgetArea::InvalidDockWidgetArea)
+    {
+        result = DockWidgetArea::AllDockAreas;
+    }
+    
+    d->AllowedAreas = result;
     
 	return d->AllowedAreas;
 }
@@ -509,15 +524,16 @@ DockWidgetArea CDockOverlay::dropAreaUnderCursor() const
 	{
 		return InvalidDockWidgetArea;
 	}
-
+    
 	DockWidgetArea Result = d->Cross->cursorLocation();
 	if (Result != InvalidDockWidgetArea)
 	{
 		return Result;
 	}
-
+    
 	auto CursorPos = QCursor::pos();
 	auto DockArea = qobject_cast<CDockAreaWidget*>(d->TargetWidget.data());
+    
 	if (!DockArea && CDockManager::autoHideConfigFlags().testFlag(CDockManager::AutoHideFeatureEnabled))
 	{
 		auto Rect = rect();
@@ -568,7 +584,7 @@ DockWidgetArea CDockOverlay::dropAreaUnderCursor() const
 		d->TabIndex = TabBar->tabInsertIndexAt(TabBar->mapFromGlobal(CursorPos));
 		return DockWidgetArea::CenterDockWidgetArea;
 	}
-
+    
 	return Result;
 }
 
@@ -601,31 +617,11 @@ DockWidgetArea CDockOverlay::showOverlay(QWidget* target)
 	{
 		DockWidgetArea da = dropAreaUnderCursor();
         
-        /*
-        if (qobject_cast<CDockManager*>(target))
-        {
-            da = NoDockWidgetArea;
-        }
-        
-        CDockAreaWidget* area = nullptr;
-        if ((area = qobject_cast<CDockAreaWidget*>(target)) && area->isCentralWidgetArea())
-        {
-            da = OuterDockAreas;
-        }
-        
-        else if ((area = qobject_cast<CDockAreaWidget*>(target))&& area->dockContainer()->isFloating())
-        {
-            // da = CenterDockWidgetArea;
-        }
-        */
-       
-        
         if (da != d->LastLocation)
         {
             repaint();
             d->LastLocation = da;
         }
-        
 		return da;
 	}
     
@@ -640,6 +636,7 @@ DockWidgetArea CDockOverlay::showOverlay(QWidget* target)
     show();
     d->Cross->updatePosition();
 	d->Cross->updateOverlayIcons();
+    
 	return dropAreaUnderCursor();
 }
 
@@ -673,7 +670,6 @@ bool CDockOverlay::dropPreviewEnabled() const
 void CDockOverlay::paintEvent(QPaintEvent* event)
 {
 	Q_UNUSED(event);
-
 	// Draw rect based on location
 	if (!d->DropPreviewEnabled)
 	{
@@ -849,7 +845,7 @@ void CDockOverlayCross::setupOverlayCross(CDockOverlay::eMode Mode)
 //============================================================================
 void CDockOverlayCross::updateOverlayIcons()
 {
-	if (windowHandle() && windowHandle()->devicePixelRatio() == d->LastDevicePixelRatio)
+    if (windowHandle() && windowHandle()->devicePixelRatio() == d->LastDevicePixelRatio)
 	{
 		return;
 	}
@@ -886,6 +882,7 @@ void CDockOverlayCross::setAreaWidgets(const QHash<DockWidgetArea, QWidget*>& wi
 {
 	// Delete old widgets.
 	QMutableHashIterator<DockWidgetArea, QWidget*> i(d->DropIndicatorWidgets);
+    
 	while (i.hasNext())
 	{
 		i.next();
@@ -907,7 +904,6 @@ void CDockOverlayCross::setAreaWidgets(const QHash<DockWidgetArea, QWidget*>& wi
 		d->GridLayout->addWidget(widget, p.x(), p.y(), (Qt::Alignment) areaAlignment(area));
 	}
     CDockAreaWidget* area = nullptr;
-    
     if ((area = qobject_cast<CDockAreaWidget*>(d->DockOverlay->d->TargetWidget)) && area->isCentralWidgetArea())
     {
         d->GridLayout->setContentsMargins(4, 4, 4, 4);
@@ -945,9 +941,9 @@ void CDockOverlayCross::setAreaWidgets(const QHash<DockWidgetArea, QWidget*>& wi
 		d->GridLayout->setColumnStretch(3, 1);
 		d->GridLayout->setColumnStretch(4, 0);
 	}
-	reset();
+    
+    reset();
 }
-
 
 //============================================================================
 DockWidgetArea CDockOverlayCross::cursorLocation() const
@@ -995,23 +991,23 @@ void CDockOverlayCross::updatePosition()
 //============================================================================
 void CDockOverlayCross::reset()
 {
-	QList<DockWidgetArea> allAreas;
-	allAreas << TopDockWidgetArea << RightDockWidgetArea
-		<< BottomDockWidgetArea << LeftDockWidgetArea << CenterDockWidgetArea;
-	const DockWidgetAreas allowedAreas = d->DockOverlay->allowedAreas();
-
-	// Update visibility of area widgets based on allowedAreas.
-	for (int i = 0; i < allAreas.count(); ++i)
-	{
-		QPoint p = d->areaGridPosition(allAreas.at(i));
-		QLayoutItem* item = d->GridLayout->itemAtPosition(p.x(), p.y());
-		QWidget* w = nullptr;
-		if (item && (w = item->widget()) != nullptr)
-		{
-			w->setVisible(allowedAreas.testFlag(allAreas.at(i)));
+    QList<DockWidgetArea> allAreas;
+    allAreas << TopDockWidgetArea << RightDockWidgetArea
+             << BottomDockWidgetArea << LeftDockWidgetArea << CenterDockWidgetArea;
+    const DockWidgetAreas allowedAreas = d->DockOverlay->allowedAreas();
+    
+    // Update visibility of area widgets based on allowedAreas.
+    for (int i = 0; i < allAreas.count(); ++i)
+    {
+        QPoint p = d->areaGridPosition(allAreas.at(i));
+        QLayoutItem* item = d->GridLayout->itemAtPosition(p.x(), p.y());
+        QWidget* w = nullptr;
+        if (item && (w = item->widget()) != nullptr)
+        {
+            w->setVisible(allowedAreas.testFlag(allAreas.at(i)));
             w->update();
-		}
-	}
+        }
+    }
 }
 
 

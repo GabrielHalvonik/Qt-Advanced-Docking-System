@@ -74,8 +74,17 @@ CMainWindow::CMainWindow(QWidget *parent)
     PropertiesDockWidget->setMinimumSizeHintMode(CDockWidget::MinimumSizeHintFromDockWidgetMinimumSize);
     PropertiesDockWidget->resize(250, 150);
     // PropertiesDockWidget->setMinimumSize(200,150);
-    DockManager->addDockWidget(DockWidgetArea::RightDockWidgetArea, PropertiesDockWidget, CentralDockArea);
+    auto area = DockManager->addDockWidget(DockWidgetArea::RightDockWidgetArea, PropertiesDockWidget, CentralDockArea);
     ui->menuView->addAction(PropertiesDockWidget->toggleViewAction());
+    
+    ToolPanel* panel = new ToolPanel();
+    CDockWidget* panelWidget = new CDockWidget("Panel");
+    panelWidget->setWidget(panel);
+    panelWidget->setMinimumSizeHintMode(CDockWidget::MinimumSizeHintFromDockWidgetMinimumSize);
+    panelWidget->resize(250, 150);
+    // PropertiesDockWidget->setMinimumSize(200,150);
+    DockManager->addDockWidget(DockWidgetArea::BottomDockWidgetArea, panelWidget, area);
+    ui->menuView->addAction(PropertiesDockWidget->toggleViewAction());    
 
     createPerspectiveUi();
 }
@@ -117,7 +126,6 @@ void CMainWindow::savePerspective()
 	PerspectiveComboBox->addItems(DockManager->perspectiveNames());
 	PerspectiveComboBox->setCurrentText(PerspectiveName);
 }
-
 
 //============================================================================
 void CMainWindow::closeEvent(QCloseEvent* event)
