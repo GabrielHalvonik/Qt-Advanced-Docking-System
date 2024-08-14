@@ -874,7 +874,7 @@ bool CDockAreaTitleBar::event(QEvent* event)
             {
                 if (auto mouseEvent = static_cast<QMouseEvent*>(event); mouseEvent != nullptr && event->type() == QEvent::MouseButtonPress)
                 {
-                    container->startDragging(mouseEvent->pos(), container->size(), {});
+                    container->startDragging(mouseEvent->pos(), container->size(), this);
                     eventHandled = true;
                 }
                 else if (event->type() == QEvent::MouseMove)

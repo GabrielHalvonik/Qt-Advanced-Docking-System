@@ -188,6 +188,7 @@ protected:
 	virtual void closeEvent(QCloseEvent *event) override;
 	virtual void hideEvent(QHideEvent *event) override;
 	virtual void showEvent(QShowEvent *event) override;
+    virtual bool eventFilter(QObject* watched, QEvent* event) override;
 
 #ifdef Q_OS_MACOS
 	virtual bool event(QEvent *e) override;

@@ -67,6 +67,7 @@ struct FloatingDragPreviewPrivate
 		Q_EMIT _this->draggingCanceled();
 		DockManager->containerOverlay()->hideOverlay();
 		DockManager->dockAreaOverlay()->hideOverlay();
+        ContentSourceArea->show();
 		_this->close();
 	}
 
@@ -300,7 +301,7 @@ void CFloatingDragPreview::startFloating(const QPoint &DragStartMousePos,
 {
 	Q_UNUSED(MouseEventHandler)
 	Q_UNUSED(DragState)
-    d->Content->hide(); //todo: replace with proper technique
+    d->ContentSourceArea->hide();
 	resize(Size);
 	d->DragStartMousePosition = DragStartMousePos;
 	moveFloating();
@@ -312,7 +313,7 @@ void CFloatingDragPreview::startFloating(const QPoint &DragStartMousePos,
 void CFloatingDragPreview::finishDragging()
 {
 	ADS_PRINT("CFloatingDragPreview::finishDragging");
-    d->Content->show(); //todo: replace with proper technique
+    d->ContentSourceArea->show();
     
 	auto DockDropArea = d->DockManager->dockAreaOverlay()->visibleDropAreaUnderCursor();
 	auto ContainerDropArea = d->DockManager->containerOverlay()->visibleDropAreaUnderCursor();
@@ -355,7 +356,7 @@ void CFloatingDragPreview::finishDragging()
 		d->createFloatingWidget();
 	}
 
-	this->close();
+	close();
 	d->DockManager->containerOverlay()->hideOverlay();
 	d->DockManager->dockAreaOverlay()->hideOverlay();
 }

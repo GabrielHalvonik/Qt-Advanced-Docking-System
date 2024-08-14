@@ -376,8 +376,9 @@ struct FloatingDockContainerPrivate
     bool Hiding = false;
     bool AutoHideChildren = true;
     bool IsSnapped = false;
-#if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
+    bool Canceled = false;
     QWidget* MouseEventHandler = nullptr;
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
     CFloatingWidgetTitleBar* TitleBar = nullptr;
     bool IsResizing = false;
     bool MousePressed = false;
@@ -390,6 +391,22 @@ struct FloatingDockContainerPrivate
 
     void titleMouseReleaseEvent();
     void updateDropOverlays(const QPoint &GlobalPos);
+    
+    /**
+     * Cancel dragging
+     */
+    void cancelDragging()
+    {
+        Canceled = true;
+        if (auto floated = DockContainer->parentWidget(); floated != nullptr)
+        {
+            MouseEventHandler->releaseMouse();
+            floated->move(DragStartPos);
+            floated->setWindowOpacity(1);
+        }
+        DockManager->containerOverlay()->hideOverlay();
+        DockManager->dockAreaOverlay()->hideOverlay();
+    }
 
     /**
      * Returns true if the given config flag is set
@@ -683,6 +700,8 @@ CFloatingDockContainer::CFloatingDockContainer(CDockManager *DockManager) :
 
     setWindowFlags(Qt::Tool | Qt::CustomizeWindowHint);
     DockManager->registerFloatingWidget(this);
+    
+    qApp->installEventFilter(this);
 }
 
 //============================================================================
@@ -974,11 +993,30 @@ void CFloatingDockContainer::showEvent(QShowEvent *event)
 #endif
 }
 
+bool CFloatingDockContainer::eventFilter(QObject *watched, QEvent *event)
+{
+    Q_UNUSED(watched);
+    if (!d->Canceled && event->type() == QEvent::KeyPress)
+    {
+        QKeyEvent* e = static_cast<QKeyEvent*>(event);
+        if (e->key() == Qt::Key_Escape)
+        {
+            watched->removeEventFilter(qApp);
+            d->cancelDragging();
+        }
+    }
+    
+    return false;
+}
+
 
 //============================================================================
 void CFloatingDockContainer::startFloating(const QPoint &DragStartMousePos,
                                            const QSize &Size, eDragState DragState, QWidget *MouseEventHandler)
 {
+    d->Canceled = false;
+    d->DragStartPos = pos();
+    
 #if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
     if (!isMaximized())
     {
@@ -1013,6 +1051,8 @@ void CFloatingDockContainer::startFloating(const QPoint &DragStartMousePos,
 
 void CFloatingDockContainer::startDragging(const QPoint &DragStartMousePos, const QSize &Size, QWidget *MouseEventHandler)
 {
+    d->MouseEventHandler = MouseEventHandler;
+    
     if (QGuiApplication::keyboardModifiers() & Qt::ShiftModifier)
     {
         DockSnappingManager::instance().draggingStarted(DragStartMousePos, this);
@@ -1028,6 +1068,8 @@ void CFloatingDockContainer::startDragging(const QPoint &DragStartMousePos, cons
 //============================================================================
 void CFloatingDockContainer::moveFloating()
 {
+    if (d->Canceled) return;
+    
     int borderSize = (frameSize().width() - size().width()) / 2;
     QPoint currentCursorPos = QCursor::pos();
     QPoint moveToPos = currentCursorPos - d->DragStartMousePosition - QPoint(borderSize, 0);
@@ -1308,6 +1350,7 @@ bool CFloatingDockContainer::event(QEvent *e)
 void CFloatingDockContainer::moveEvent(QMoveEvent *event)
 {
     QWidget::moveEvent(event);
+    
     switch (d->DraggingState)
     {
     case DraggingMousePressed:
