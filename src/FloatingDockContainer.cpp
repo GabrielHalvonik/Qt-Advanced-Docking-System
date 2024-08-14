@@ -405,7 +405,7 @@ struct FloatingDockContainerPrivate
             
             if (auto container = qobject_cast<CFloatingDockContainer*>(floated); container)
             {
-                container->finishDragging();
+                container->finishDragging(true);
             }
         }
         DockManager->containerOverlay()->hideOverlay();
@@ -1281,7 +1281,7 @@ void CFloatingDockContainer::finishDropOperation()
 }
 
 //============================================================================
-void CFloatingDockContainer::finishDragging()
+void CFloatingDockContainer::finishDragging(bool forced)
 {
     ADS_PRINT("CFloatingDockContainer::finishDragging");
     
@@ -1293,7 +1293,6 @@ void CFloatingDockContainer::finishDragging()
         d->MouseEventHandler = nullptr;
     }
 #endif
-    d->titleMouseReleaseEvent();
     
     setWindowOpacity(1);
     
@@ -1301,9 +1300,13 @@ void CFloatingDockContainer::finishDragging()
     pal.setBrush(QPalette::Current, QPalette::Window, palette().color(QPalette::Disabled, QPalette::Base));
     setPalette(pal);
     
-    if (QGuiApplication::keyboardModifiers() & Qt::ShiftModifier)
+    if (!forced)
     {
-        DockSnappingManager::instance().draggingFinished();
+        d->titleMouseReleaseEvent();
+        if (QGuiApplication::keyboardModifiers() & Qt::ShiftModifier)
+        {
+            DockSnappingManager::instance().draggingFinished();
+        }
     }
 }
 

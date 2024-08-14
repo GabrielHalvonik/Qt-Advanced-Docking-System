@@ -93,7 +93,7 @@ public:
 	 * This function should be called from a mouse release event handler
 	 * to finish the dragging
 	 */
-	virtual void finishDragging() = 0;
+	virtual void finishDragging(bool forced = false) = 0;
 };
 
 
@@ -145,7 +145,7 @@ protected:
 	 * Call this function if you explicitly want to signal that dragging has
 	 * finished
 	 */
-	virtual void finishDragging() override;
+	virtual void finishDragging(bool forced = false) override;
 
 	/**
 	 * This function deletes all dock widgets in it.

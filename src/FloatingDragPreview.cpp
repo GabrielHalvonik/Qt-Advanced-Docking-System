@@ -311,7 +311,7 @@ void CFloatingDragPreview::startFloating(const QPoint &DragStartMousePos,
 
 
 //============================================================================
-void CFloatingDragPreview::finishDragging()
+void CFloatingDragPreview::finishDragging(bool)
 {
 	ADS_PRINT("CFloatingDragPreview::finishDragging");
     d->ContentSourceArea->show();

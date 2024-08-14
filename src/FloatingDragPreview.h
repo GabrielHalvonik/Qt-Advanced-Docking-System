@@ -89,7 +89,7 @@ public: // implements IFloatingWidget -----------------------------------------
 	 * Hides the dock overlays and executes the real undocking and docking
 	 * of the assigned Content widget
 	 */
-	virtual void finishDragging() override;
+	virtual void finishDragging(bool forced = false) override;
 
 	/**
 	 * Cleanup auto hide container if the dragged widget has one
