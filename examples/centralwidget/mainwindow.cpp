@@ -84,8 +84,8 @@ CMainWindow::CMainWindow(QWidget *parent)
     panelWidget->resize(250, 150);
     // PropertiesDockWidget->setMinimumSize(200,150);
     DockManager->addDockWidget(DockWidgetArea::BottomDockWidgetArea, panelWidget, area);
-    ui->menuView->addAction(PropertiesDockWidget->toggleViewAction());    
-
+    ui->menuView->addAction(PropertiesDockWidget->toggleViewAction());
+    
     createPerspectiveUi();
 }
 

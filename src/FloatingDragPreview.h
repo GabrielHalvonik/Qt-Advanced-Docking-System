@@ -74,7 +74,6 @@ public:
      */
     virtual bool eventFilter(QObject *watched, QEvent *event) override;
 
-
 public: // implements IFloatingWidget -----------------------------------------
 	virtual void startFloating(const QPoint& DragStartMousePos, const QSize& Size,
         eDragState DragState, QWidget* MouseEventHandler) override;

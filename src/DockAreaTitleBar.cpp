@@ -864,7 +864,7 @@ bool CDockAreaTitleBar::isAutoHide() const
 
 bool CDockAreaTitleBar::event(QEvent* event)
 {
-    bool eventHandled = false;
+    bool handled = false;
     
     if (event != nullptr && d->DockArea != nullptr)
     {
@@ -875,22 +875,23 @@ bool CDockAreaTitleBar::event(QEvent* event)
                 if (auto mouseEvent = static_cast<QMouseEvent*>(event); mouseEvent != nullptr && event->type() == QEvent::MouseButtonPress)
                 {
                     container->startDragging(mouseEvent->pos(), container->size(), this);
-                    eventHandled = true;
+                    handled = true;
                 }
                 else if (event->type() == QEvent::MouseMove)
                 {
                     container->moveFloating();
-                    eventHandled = true;
+                    handled = true;
                 }
                 else if (event->type() == QEvent::MouseButtonRelease)
                 {
                     container->finishDragging();
-                    eventHandled = true;
+                    handled = true;
                 }
             }
         }
     }
-    if (eventHandled) return true;
+    
+    event->setAccepted(handled);
     
     return QFrame::event(event);
 }

@@ -23,20 +23,20 @@ public:
 
 protected:
 	virtual void closeEvent(QCloseEvent* event) override;
-
+    
 private:
 	QAction* SavePerspectiveAction = nullptr;
 	QWidgetAction* PerspectiveListAction = nullptr;
 	QComboBox* PerspectiveComboBox = nullptr;
-
+    
     Ui::CMainWindow *ui;
-
+    
     ads::CDockManager* DockManager;
     ads::CDockAreaWidget* StatusDockArea;
     ads::CDockWidget* TimelineDockWidget;
-
+    
     void createPerspectiveUi();
-
+    
 private slots:
 	void savePerspective();
 };

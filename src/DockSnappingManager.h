@@ -59,8 +59,7 @@ private:
     public:
         bool eventFilter(QObject*, QEvent* event) override
         {
-            auto mouseEvent = static_cast<QMouseEvent*>(event);
-            if (mouseEvent != nullptr)
+            if (auto mouseEvent = static_cast<QMouseEvent*>(event); mouseEvent)
             {
                 if (auto screen = QApplication::screenAt(QCursor::pos()))
                 {

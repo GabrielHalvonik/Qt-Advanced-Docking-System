@@ -908,15 +908,21 @@ bool CDockWidget::eventFilter(QObject *watched, QEvent *event)
     
     if (isTabbed())
     {
-        if (auto mouseEvent = static_cast<QMouseEvent*>(event); mouseEvent != nullptr && event->type() == QEvent::MouseButtonPress)
-        {
+        if (
+            auto mouseEvent = static_cast<QMouseEvent*>(event); mouseEvent &&
+            event->type() == QEvent::MouseButtonPress &&
+            mouseEvent->button() == Qt::MouseButton::LeftButton
+        ) {
             d->DockManager->addDockWidgetFloating(this);
         }
     }
     else if (auto container = floatingDockContainer(); container != nullptr)
     {
-        if (auto mouseEvent = static_cast<QMouseEvent*>(event); mouseEvent != nullptr && event->type() == QEvent::MouseButtonPress)
-        {
+        if (
+            auto mouseEvent = static_cast<QMouseEvent*>(event); mouseEvent &&
+            event->type() == QEvent::MouseButtonPress &&
+            mouseEvent->button() == Qt::MouseButton::LeftButton
+        ) {
             container->startDragging(mouseEvent->pos(), container->size(), {});
             eventHandled = true;
         }
@@ -934,8 +940,11 @@ bool CDockWidget::eventFilter(QObject *watched, QEvent *event)
 
     if (watched != nullptr && watched == toolBar())
     {
-        if (event->type() == QEvent::MouseButtonPress || event->type() == QEvent::MouseButtonRelease || event->type() == QEvent::MouseMove)
-        {
+        if (
+            event->type() == QEvent::MouseButtonPress ||
+            event->type() == QEvent::MouseButtonRelease ||
+            event->type() == QEvent::MouseMove
+        ) {
             QCoreApplication::sendEvent(dockAreaWidget()->titleBar(), event);
             eventHandled = true;
         }

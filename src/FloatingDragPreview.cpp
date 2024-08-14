@@ -188,6 +188,7 @@ void FloatingDragPreviewPrivate::createFloatingWidget()
 		if (!CDockManager::testConfigFlag(CDockManager::DragPreviewHasWindowFrame))
 		{
 			QApplication::processEvents();
+            
 			int FrameHeight = FloatingWidget->frameGeometry().height() - FloatingWidget->geometry().height();
 			QRect FixedGeometry = _this->geometry();
 			FixedGeometry.adjust(0, FrameHeight, 0, 0);
@@ -439,19 +440,35 @@ void CFloatingDragPreview::onApplicationStateChanged(Qt::ApplicationState state)
 bool CFloatingDragPreview::eventFilter(QObject *watched, QEvent *event)
 {
 	Q_UNUSED(watched);
-    if (!d->Canceled && event->type() == QEvent::KeyPress)
+    
+    if (!d->Canceled)
     {
-        QKeyEvent* e = static_cast<QKeyEvent*>(event);
-        if (e->key() == Qt::Key_Escape)
+        if (event->type() == QEvent::MouseButtonPress)
         {
-            watched->removeEventFilter(this);
-            d->cancelDragging();
+            if (
+                auto mouseEvent = static_cast<QMouseEvent*>(event); mouseEvent &&
+                event->type() == QEvent::MouseButtonPress &&
+                mouseEvent->button() == Qt::MouseButton::RightButton
+            ) {
+                watched->removeEventFilter(this);
+                d->cancelDragging();
+            }
+        }
+        
+        if (event->type() == QEvent::KeyPress)
+        {
+            if (
+                auto keyEvent = static_cast<QKeyEvent*>(event); keyEvent &&
+                keyEvent->key() == Qt::Key_Escape
+            ) {
+                watched->removeEventFilter(this);
+                d->cancelDragging();
+            }
         }
     }
-
-    return false;
+    
+    return QWidget::eventFilter(watched, event);
 }
-
 
 
 } // namespace ads
