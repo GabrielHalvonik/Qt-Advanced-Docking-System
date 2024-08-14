@@ -161,6 +161,7 @@ Q_ENUMS(SideBarLocation)
 
 namespace internal
 {
+static const qreal DraggingDockOpacity = 0.6;
 static const bool RestoreTesting = true;
 static const bool Restore = false;
 static const char* const ClosedProperty = "close";

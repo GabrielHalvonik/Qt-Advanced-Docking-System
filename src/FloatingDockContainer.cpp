@@ -556,13 +556,11 @@ void FloatingDockContainerPrivate::updateDropOverlays(const QPoint &GlobalPos)
     {
         if (container == this->DockContainer)
         {
-            qInfo() << "🏓«";
             continue;
         }
-        qInfo() << "ctnr";
+        
         for (auto area : container->openedDockAreas())
         {
-            qInfo() << "area";
             if (!area->isVisible())
             {
                 continue;
@@ -1008,6 +1006,7 @@ void CFloatingDockContainer::startFloating(const QPoint &DragStartMousePos,
     d->DragStartMousePosition = DragStartMousePos;
     d->setState(DragState);
     moveFloating();
+    setWindowOpacity(internal::DraggingDockOpacity);
     show();
 #endif
 }
@@ -1212,8 +1211,9 @@ void CFloatingDockContainer::finishDropOperation()
 void CFloatingDockContainer::finishDragging()
 {
     ADS_PRINT("CFloatingDockContainer::finishDragging");
-#if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
+    
     setWindowOpacity(1);
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
     activateWindow();
     if (d->MouseEventHandler)
     {
