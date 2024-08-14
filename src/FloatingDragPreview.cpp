@@ -420,7 +420,7 @@ void CFloatingDragPreview::paintEvent(QPaintEvent* event)
 		Color = Color.lighter(130);
 		Color.setAlpha(64);
 		painter.setBrush(Color);
-		painter.drawRect(rect().adjusted(0, 0, -1, -1));
+		painter.drawRect(rect().adjusted(0, 0, 0, 0));
 	}
 }
 

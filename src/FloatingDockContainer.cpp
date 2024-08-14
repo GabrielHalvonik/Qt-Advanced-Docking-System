@@ -398,14 +398,19 @@ struct FloatingDockContainerPrivate
     void cancelDragging()
     {
         Canceled = true;
-        if (auto floated = DockContainer->parentWidget(); floated != nullptr)
+        if (auto floated = DockContainer->parentWidget(); floated)
         {
             MouseEventHandler->releaseMouse();
             floated->move(DragStartPos);
-            floated->setWindowOpacity(1);
+            
+            if (auto container = qobject_cast<CFloatingDockContainer*>(floated); container)
+            {
+                container->finishDragging();
+            }
         }
         DockManager->containerOverlay()->hideOverlay();
         DockManager->dockAreaOverlay()->hideOverlay();
+        
     }
 
     /**
@@ -1061,7 +1066,7 @@ void CFloatingDockContainer::startFloating(const QPoint &DragStartMousePos,
     d->DragStartMousePosition = DragStartMousePos;
     d->setState(DragState);
     moveFloating();
-    setWindowOpacity(internal::DraggingDockOpacity);
+    
     show();
 #endif
 }
@@ -1079,6 +1084,15 @@ void CFloatingDockContainer::startDragging(const QPoint &DragStartMousePos, cons
     {
         d->IsSnapped = false;
     }
+    
+    setWindowOpacity(internal::DraggingDockOpacity);
+    
+    QPalette pal;
+    auto color = palette().color(QPalette::Active, QPalette::Highlight).darker(120);
+    color.setAlpha(100);
+    pal.setBrush(QPalette::Current, QPalette::Window, color);
+    setPalette(pal);
+    
     startFloating(DragStartMousePos, Size, DraggingFloatingWidget, MouseEventHandler);
 }
 
@@ -1271,7 +1285,6 @@ void CFloatingDockContainer::finishDragging()
 {
     ADS_PRINT("CFloatingDockContainer::finishDragging");
     
-    setWindowOpacity(1);
 #if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
     activateWindow();
     if (d->MouseEventHandler)
@@ -1281,6 +1294,12 @@ void CFloatingDockContainer::finishDragging()
     }
 #endif
     d->titleMouseReleaseEvent();
+    
+    setWindowOpacity(1);
+    
+    QPalette pal;
+    pal.setBrush(QPalette::Current, QPalette::Window, palette().color(QPalette::Disabled, QPalette::Base));
+    setPalette(pal);
     
     if (QGuiApplication::keyboardModifiers() & Qt::ShiftModifier)
     {
