@@ -400,7 +400,10 @@ struct FloatingDockContainerPrivate
         Canceled = true;
         if (auto floated = DockContainer->parentWidget(); floated)
         {
-            MouseEventHandler->releaseMouse();
+            if (MouseEventHandler)
+            {
+                MouseEventHandler->releaseMouse();
+            }
             floated->move(DragStartPos);
             
             if (auto container = qobject_cast<CFloatingDockContainer*>(floated); container)

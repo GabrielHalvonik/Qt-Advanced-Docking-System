@@ -171,9 +171,10 @@ struct DockOverlayCrossPrivate
 	QWidget* createDropIndicatorWidget(DockWidgetArea DockWidgetArea,
 		CDockOverlay::eMode Mode, SideBarLocation location)
 	{
+        
 		QLabel* l = new QLabel();
 		l->setObjectName("DockWidgetAreaLabel");
-
+        { static int counter = 0; qInfo() << ++counter << " : CREATE !!! "; }
         qreal metric = dropIndicatiorWidth(l);
 		QSizeF size(metric, metric);
 		if (internal::isSideBarArea(DockWidgetArea))
@@ -205,8 +206,8 @@ struct DockOverlayCrossPrivate
         else
         {
             qreal angle = (location == SideBarLocation::SideBarTop) ? 270 :
-                              (location == SideBarLocation::SideBarBottom) ? 90 :
-                              (location == SideBarLocation::SideBarLeft) ? 180 : 0;
+                          (location == SideBarLocation::SideBarBottom) ? 90 :
+                          (location == SideBarLocation::SideBarLeft) ? 180 : 0;
             
             QPixmap pixmap(IndicatorSize, IndicatorSize);
             pixmap.fill(Qt::transparent);
@@ -229,6 +230,7 @@ struct DockOverlayCrossPrivate
 		l->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint);
 		l->setAttribute(Qt::WA_TranslucentBackground);
 		l->setProperty("dockWidgetArea", DockWidgetArea);
+        
 		return l;
 	}
 
@@ -616,7 +618,10 @@ DockWidgetArea CDockOverlay::showOverlay(QWidget* target)
 	if (d->TargetWidget == target)
 	{
 		DockWidgetArea da = dropAreaUnderCursor();
-        
+        if (da == BottomDockWidgetArea)
+        {
+            qInfo() << "what";
+        }
         if (da != d->LastLocation)
         {
             repaint();
@@ -634,6 +639,7 @@ DockWidgetArea CDockOverlay::showOverlay(QWidget* target)
 	QPoint TopLeft = target->mapToGlobal(target->rect().topLeft());
 	move(TopLeft);
     show();
+    
     d->Cross->updatePosition();
 	d->Cross->updateOverlayIcons();
     
@@ -670,7 +676,7 @@ bool CDockOverlay::dropPreviewEnabled() const
 void CDockOverlay::paintEvent(QPaintEvent* event)
 {
 	Q_UNUSED(event);
-	// Draw rect based on location
+    // Draw rect based on location
 	if (!d->DropPreviewEnabled)
 	{
 		d->DropAreaRect = QRect();
@@ -679,6 +685,7 @@ void CDockOverlay::paintEvent(QPaintEvent* event)
 
 	QRect r = rect();
 	const DockWidgetArea da = dropAreaUnderCursor();
+    
 	double Factor = (CDockOverlay::ModeContainerOverlay == d->Mode) ?
 		3 : 2;
 
@@ -824,21 +831,13 @@ CDockOverlayCross::~CDockOverlayCross()
 void CDockOverlayCross::setupOverlayCross(CDockOverlay::eMode Mode)
 {
 	d->Mode = Mode;
-
-	QHash<DockWidgetArea, QWidget*> areaWidgets;
-	areaWidgets.insert(TopDockWidgetArea, d->createDropIndicatorWidget(TopDockWidgetArea, Mode, SideBarLocation::SideBarTop));
-	areaWidgets.insert(RightDockWidgetArea, d->createDropIndicatorWidget(RightDockWidgetArea, Mode, SideBarLocation::SideBarRight));
-	areaWidgets.insert(BottomDockWidgetArea, d->createDropIndicatorWidget(BottomDockWidgetArea, Mode, SideBarLocation::SideBarBottom));
-	areaWidgets.insert(LeftDockWidgetArea, d->createDropIndicatorWidget(LeftDockWidgetArea, Mode, SideBarLocation::SideBarLeft));
-	areaWidgets.insert(CenterDockWidgetArea, d->createDropIndicatorWidget(CenterDockWidgetArea, Mode, SideBarLocation::SideBarNone));
-
+    
 #if QT_VERSION >= 0x050600
 	d->LastDevicePixelRatio = devicePixelRatioF();
 #else
     d->LastDevicePixelRatio = devicePixelRatio();
 #endif
-	setAreaWidgets(areaWidgets);
-	d->UpdateRequired = true;
+	d->UpdateRequired = false;
 }
 
 
@@ -849,7 +848,7 @@ void CDockOverlayCross::updateOverlayIcons()
 	{
 		return;
 	}
-
+    
 	for (auto Widget : d->DropIndicatorWidgets)
 	{
 		d->updateDropIndicatorIcon(Widget);
@@ -968,6 +967,7 @@ DockWidgetArea CDockOverlayCross::cursorLocation() const
 //============================================================================
 void CDockOverlayCross::showEvent(QShowEvent*)
 {
+    { static int counter = 0; qInfo() << ++counter << " : 🎾 SHOWEVENT 🎾 : "; }
 	if (d->UpdateRequired)
 	{
 		setupOverlayCross(d->Mode);
@@ -979,6 +979,40 @@ void CDockOverlayCross::showEvent(QShowEvent*)
 //============================================================================
 void CDockOverlayCross::updatePosition()
 {
+    auto Mode = d->Mode;
+    
+    auto allowed = d->DockOverlay->allowedAreas();
+    
+    QHash<DockWidgetArea, QWidget*> areaWidgets;
+    
+    if (allowed.testFlag(TopDockWidgetArea))
+    {
+        areaWidgets.insert(TopDockWidgetArea, d->createDropIndicatorWidget(TopDockWidgetArea, Mode, SideBarLocation::SideBarTop));
+    }
+    if (allowed.testFlag(RightDockWidgetArea))
+    {
+        areaWidgets.insert(RightDockWidgetArea, d->createDropIndicatorWidget(RightDockWidgetArea, Mode, SideBarLocation::SideBarRight));
+    }
+    if (allowed.testFlag(BottomDockWidgetArea))
+    {
+        areaWidgets.insert(BottomDockWidgetArea, d->createDropIndicatorWidget(BottomDockWidgetArea, Mode, SideBarLocation::SideBarBottom));
+    }
+    if (allowed.testFlag(LeftDockWidgetArea))
+    {
+        areaWidgets.insert(LeftDockWidgetArea, d->createDropIndicatorWidget(LeftDockWidgetArea, Mode, SideBarLocation::SideBarLeft));
+    }
+    if (allowed.testFlag(CenterDockWidgetArea))
+    {
+        areaWidgets.insert(CenterDockWidgetArea, d->createDropIndicatorWidget(CenterDockWidgetArea, Mode, SideBarLocation::SideBarNone));
+    }
+
+#if QT_VERSION >= 0x050600
+    d->LastDevicePixelRatio = devicePixelRatioF();
+#else
+    d->LastDevicePixelRatio = devicePixelRatio();
+#endif
+    setAreaWidgets(areaWidgets);
+    
 	resize(d->DockOverlay->size());
 	QPoint TopLeft = d->DockOverlay->pos();
 	QPoint Offest((this->width() - d->DockOverlay->width()) / 2,
