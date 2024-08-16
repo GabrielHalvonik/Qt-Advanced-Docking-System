@@ -610,6 +610,11 @@ void FloatingDockContainerPrivate::updateDropOverlays(const QPoint &GlobalPos)
         DockManager->dockAreaOverlay()->showOverlay(target);
         DropContainer = top;
     }
+    else
+    {
+        { static int counter = 0; qInfo() << ++counter << " : "; }
+        DockManager->dockAreaOverlay()->hideOverlay();
+    }
     
     return;    
 }
