@@ -509,7 +509,12 @@ void CDockAreaWidget::addDockWidget(CDockWidget* DockWidget)
     }
     else
     {
-        d->Layout->setContentsMargins(DockMarginSize, DockMarginSize, DockMarginSize, DockMarginSize);
+        d->Layout->setContentsMargins(
+            internal::DockMarginSize,
+            internal::DockMarginSize,
+            internal::DockMarginSize,
+            internal::DockMarginSize
+        );
     }
 }
 
@@ -541,7 +546,10 @@ void CDockAreaWidget::insertDockWidget(int index, CDockWidget* DockWidget,
     }
     else
     {
-        d->MinSizeHint.setWidth(qMax(d->MinSizeHint.width(), DockWidget->minimumSizeHint().width() + DockMarginSize * 2));
+        d->MinSizeHint.setWidth(
+            qMax(d->MinSizeHint.width(),
+            DockWidget->minimumSizeHint().width() + internal::DockMarginSize * 2)
+        );
     }
 	if (Activate)
 	{

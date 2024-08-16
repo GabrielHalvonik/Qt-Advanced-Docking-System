@@ -153,7 +153,6 @@ void FloatingDragPreviewPrivate::updateDropOverlays(const QPoint &GlobalPos)
     }
     else
     {
-        { static int counter = 0; qInfo() << ++counter << " : "; }
         DockManager->dockAreaOverlay()->hideOverlay();
     }
     

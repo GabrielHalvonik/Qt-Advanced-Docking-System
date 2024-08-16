@@ -163,6 +163,7 @@ namespace internal
 {
 static const qreal DraggingDockOpacity = 0.6;
 static const bool RestoreTesting = true;
+static const int DockMarginSize = 0;
 static const bool Restore = false;
 static const char* const ClosedProperty = "close";
 static const char* const DirtyProperty = "dirty";

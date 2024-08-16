@@ -612,7 +612,6 @@ void FloatingDockContainerPrivate::updateDropOverlays(const QPoint &GlobalPos)
     }
     else
     {
-        { static int counter = 0; qInfo() << ++counter << " : "; }
         DockManager->dockAreaOverlay()->hideOverlay();
     }
     
@@ -1111,9 +1110,9 @@ void CFloatingDockContainer::moveFloating()
     
     int borderSize = (frameSize().width() - size().width()) / 2;
     QPoint currentCursorPos = QCursor::pos();
-    QPoint moveToPos = currentCursorPos - d->DragStartMousePosition - QPoint(borderSize, 0);
+    QPoint moveToPos = currentCursorPos - d->DragStartMousePosition - QPoint(borderSize, 0) - QPoint(internal::DockMarginSize, internal::DockMarginSize);
     QPoint offset = moveToPos - pos();
-
+    
     auto snapping = DockSnappingManager::instance().getSnapPoint(this, d->DockManager, d->DragStartMousePosition);
     bool shouldSnap = std::get<0>(snapping);
     QPoint snapPosition = std::get<1>(snapping);
