@@ -24,6 +24,9 @@
 #include "AutoHideDockContainer.h"
 #include "ads_globals.h"
 #include "DockSnappingManager.h"
+#include "DockWidgetTab.h"
+#include "DockAreaTitleBar.h"
+#include "DockAreaTabBar.h"
 
 namespace ads
 {
@@ -44,7 +47,7 @@ struct FloatingDragPreviewPrivate
 	bool Hidden = false;
 	QPixmap ContentPreviewPixmap;
 	bool Canceled = false;
-
+    int DraggedTabBarIndex = 0;
 
 	/**
 	 * Private data constructor
@@ -306,7 +309,41 @@ void CFloatingDragPreview::startFloating(const QPoint &DragStartMousePos,
 {
 	Q_UNUSED(MouseEventHandler)
 	Q_UNUSED(DragState)
-    d->ContentSourceArea->hide();
+    
+    if (auto widget = qobject_cast<CDockWidget*>(d->Content); widget && widget->isTabbed())
+    {
+        if (auto area = widget->dockAreaWidget(); area)
+        {
+            CDockWidget* desired = nullptr;
+            
+            auto count = area->dockWidgetsCount();
+            if (count > 0)
+            {
+                for (int i = 0; i < area->dockWidgetsCount(); ++i) {
+                    if (area->dockWidget(i) == widget)
+                    {
+                        d->DraggedTabBarIndex = i;
+                        if (i == 0)
+                        {
+                            desired = area->dockWidget(1);
+                        }
+                        else
+                        {
+                            desired = area->dockWidget(i - 1);
+                        }
+                    }
+                }
+            }
+            
+            area->setCurrentDockWidget(desired);
+            area->titleBar()->tabBar()->hide();
+        }
+    }
+    else if (d && d->ContentSourceArea)
+    {
+        d->ContentSourceArea->hide();
+    }
+    
 	resize(Size);
 	d->DragStartMousePosition = DragStartMousePos;
 	moveFloating();
@@ -318,7 +355,20 @@ void CFloatingDragPreview::startFloating(const QPoint &DragStartMousePos,
 void CFloatingDragPreview::finishDragging(bool)
 {
 	ADS_PRINT("CFloatingDragPreview::finishDragging");
-    d->ContentSourceArea->show();
+    
+    if (auto widget = qobject_cast<CDockWidget*>(d->Content); widget && widget->isTabbed())
+    {
+        
+        if (auto area = widget->dockAreaWidget(); area)
+        {
+            area->setCurrentDockWidget(area->dockWidget(d->DraggedTabBarIndex));
+            area->titleBar()->tabBar()->show();
+        }
+    }
+    else if (d && d->ContentSourceArea)
+    {
+        d->ContentSourceArea->show();
+    }
     
 	auto DockDropArea = d->DockManager->dockAreaOverlay()->visibleDropAreaUnderCursor();
 	auto ContainerDropArea = d->DockManager->containerOverlay()->visibleDropAreaUnderCursor();
