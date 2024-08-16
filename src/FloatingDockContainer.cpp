@@ -1092,13 +1092,16 @@ void CFloatingDockContainer::startDragging(const QPoint &DragStartMousePos, cons
         d->IsSnapped = false;
     }
     
-    setWindowOpacity(internal::DraggingDockOpacity);
-    
-    QPalette pal;
-    auto color = palette().color(QPalette::Active, QPalette::Highlight).darker(120);
-    color.setAlpha(100);
-    pal.setBrush(QPalette::Current, QPalette::Window, color);
-    setPalette(pal);
+    if (!d->IsSnapped)
+    {
+        setWindowOpacity(internal::DraggingDockOpacity);
+        
+        QPalette pal;
+        auto color = palette().color(QPalette::Active, QPalette::Highlight).darker(120);
+        color.setAlpha(100);
+        pal.setBrush(QPalette::Current, QPalette::Window, color);
+        setPalette(pal);
+    }
     
     startFloating(DragStartMousePos, Size, DraggingFloatingWidget, MouseEventHandler);
 }
