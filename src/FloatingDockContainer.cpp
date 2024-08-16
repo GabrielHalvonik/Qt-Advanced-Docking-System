@@ -569,7 +569,7 @@ void FloatingDockContainerPrivate::titleMouseReleaseEvent()
 //============================================================================
 void FloatingDockContainerPrivate::updateDropOverlays(const QPoint &GlobalPos)
 {
-    if (!_this->isVisible() || !DockManager)
+    if (!_this->isVisible() || !DockManager || IsSnapped)
     {
         return;
     }
