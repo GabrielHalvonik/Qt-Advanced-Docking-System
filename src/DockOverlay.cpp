@@ -174,7 +174,6 @@ struct DockOverlayCrossPrivate
         
 		QLabel* l = new QLabel();
 		l->setObjectName("DockWidgetAreaLabel");
-        { static int counter = 0; qInfo() << ++counter << " : CREATE !!! "; }
         qreal metric = dropIndicatiorWidth(l);
 		QSizeF size(metric, metric);
 		if (internal::isSideBarArea(DockWidgetArea))
@@ -527,9 +526,10 @@ DockWidgetArea CDockOverlay::dropAreaUnderCursor() const
 		return InvalidDockWidgetArea;
 	}
     
-	DockWidgetArea Result = d->Cross->cursorLocation();
+    DockWidgetArea Result = d->Cross->cursorLocation();
+    
 	if (Result != InvalidDockWidgetArea)
-	{
+    {
 		return Result;
 	}
     
@@ -618,13 +618,22 @@ DockWidgetArea CDockOverlay::showOverlay(QWidget* target)
 	if (d->TargetWidget == target)
 	{
 		DockWidgetArea da = dropAreaUnderCursor();
-        if (da == BottomDockWidgetArea)
+        
+        if (da != d->LastLocation || (da == NoDockWidgetArea && d->DropAreaRect.size() != QSize(0, 0)))
         {
-            qInfo() << "what";
-        }
-        if (da != d->LastLocation)
-        {
-            repaint();
+            if (da == NoDockWidgetArea)
+            {
+                this->setVisible(false);
+                this->setVisible(true);
+                
+                d->Cross->updatePosition();
+                d->Cross->update();
+            }
+            else
+            {
+                update();
+            }
+            
             d->LastLocation = da;
         }
 		return da;
@@ -678,11 +687,11 @@ void CDockOverlay::paintEvent(QPaintEvent* event)
 	Q_UNUSED(event);
     // Draw rect based on location
 	if (!d->DropPreviewEnabled)
-	{
+    {
 		d->DropAreaRect = QRect();
 		return;
 	}
-
+    
 	QRect r = rect();
 	const DockWidgetArea da = dropAreaUnderCursor();
     
@@ -691,30 +700,33 @@ void CDockOverlay::paintEvent(QPaintEvent* event)
 
 	switch (da)
 	{
-    case TopDockWidgetArea: r.setHeight(r.height() / Factor); break;
-	case RightDockWidgetArea: r.setX(r.width() * (1 - 1 / Factor)); break;
-	case BottomDockWidgetArea: r.setY(r.height() * (1 - 1 / Factor)); break;
-	case LeftDockWidgetArea: r.setWidth(r.width() / Factor); break;
-	case CenterDockWidgetArea: r = rect();break;
-	case LeftAutoHideArea: r.setWidth(d->sideBarOverlaySize(SideBarLeft)); break;
-	case RightAutoHideArea: r.setX(r.width() - d->sideBarOverlaySize(SideBarRight)); break;
-	case TopAutoHideArea: r.setHeight(d->sideBarOverlaySize(SideBarTop)); break;
-	case BottomAutoHideArea: r.setY(r.height() - d->sideBarOverlaySize(SideBarBottom)); break;
-	default: return;
-	}
+        case TopDockWidgetArea: r.setHeight(r.height() / Factor); break;
+        case RightDockWidgetArea: r.setX(r.width() * (1 - 1 / Factor)); break;
+        case BottomDockWidgetArea: r.setY(r.height() * (1 - 1 / Factor)); break;
+        case LeftDockWidgetArea: r.setWidth(r.width() / Factor); break;
+        case CenterDockWidgetArea: r = rect(); break;
+        case LeftAutoHideArea: r.setWidth(d->sideBarOverlaySize(SideBarLeft)); break;
+        case RightAutoHideArea: r.setX(r.width() - d->sideBarOverlaySize(SideBarRight)); break;
+        case TopAutoHideArea: r.setHeight(d->sideBarOverlaySize(SideBarTop)); break;
+        case BottomAutoHideArea: r.setY(r.height() - d->sideBarOverlaySize(SideBarBottom)); break;
+        default: {
+            d->DropAreaRect = QRect();
+            return;
+        }
+    }
 
 	QPainter painter(this);
     QColor Color = palette().color(QPalette::Active, QPalette::Highlight);
     QPen Pen = painter.pen();
     Pen.setColor(Color.darker(120));
     Pen.setStyle(Qt::SolidLine);
-    // Pen.setWidth(1);
+    Pen.setWidth(1);
     Pen.setCosmetic(true);
     painter.setPen(Pen);
     Color = Color.lighter(130);
     Color.setAlpha(64);
     painter.setBrush(Color);
-	painter.drawRect(r.adjusted(0, 0, -1, -1));
+    painter.drawRect(r.adjusted(0, 0, -1, -1));
 	d->DropAreaRect = r;
 }
 
@@ -967,7 +979,6 @@ DockWidgetArea CDockOverlayCross::cursorLocation() const
 //============================================================================
 void CDockOverlayCross::showEvent(QShowEvent*)
 {
-    { static int counter = 0; qInfo() << ++counter << " : 🎾 SHOWEVENT 🎾 : "; }
 	if (d->UpdateRequired)
 	{
 		setupOverlayCross(d->Mode);
