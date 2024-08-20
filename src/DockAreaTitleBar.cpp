@@ -601,11 +601,29 @@ void CDockAreaTitleBar::setVisible(bool Visible)
 }
 
 
+bool CDockAreaTitleBar::eventFilter(QObject* watched, QEvent* event)
+{
+    
+    if (
+        d->DragState != eDragState::DraggingInactive &&
+        (event->type() == QEvent::Leave || event->type() == QEvent::Enter)
+    ) {
+        event->accept();        
+        return true;
+    }
+    
+    
+    return QFrame::eventFilter(watched, event);
+}
+
+
 //============================================================================
 void CDockAreaTitleBar::mousePressEvent(QMouseEvent* ev)
 {
 	if (ev->button() == Qt::LeftButton)
 	{
+        qApp->installEventFilter(this);
+        
 		ev->accept();
 		d->DragStartMousePos = ev->pos();
 		d->DragState = DraggingMousePressed;
@@ -626,6 +644,8 @@ void CDockAreaTitleBar::mouseReleaseEvent(QMouseEvent* ev)
 	if (ev->button() == Qt::LeftButton)
 	{
         ADS_PRINT("CDockAreaTitleBar::mouseReleaseEvent");
+        qApp->removeEventFilter(this);
+        
 		ev->accept();
 		auto CurrentDragState = d->DragState;
 		d->DragStartMousePos = QPoint();

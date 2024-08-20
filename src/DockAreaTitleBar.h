@@ -126,6 +126,8 @@ private Q_SLOTS:
 	void onAutoHideToActionClicked();
 
 protected:
+    
+    bool eventFilter(QObject* watched, QEvent* event) override;
     /**
 	 * Stores mouse position to detect dragging
 	 */
@@ -253,6 +255,7 @@ Q_SIGNALS:
 	 * or if the user clicks on a tab item in the title bar tab menu.
 	 */
 	void tabBarClicked(int index);
+
 }; // class name
 
 }

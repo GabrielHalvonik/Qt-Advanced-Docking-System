@@ -11,6 +11,26 @@ public:
     {
         setStyleSheet("QWidget { background-color: gray; }");
     }
+    
+    //  Simulating pointer capture while quickly dragging panels  //
+    
+    bool event(QEvent* event) override
+    {
+        return QWidget::event(event);
+    }
+    
+    void enterEvent(QEvent* event) override
+    {
+        setStyleSheet("QWidget { background-color: orange; }");
+        QWidget::enterEvent(event);
+    }
+    
+    void leaveEvent(QEvent* event) override
+    {
+        setStyleSheet("QWidget { background-color: gray; }");
+        QWidget::leaveEvent(event);
+    }
+    
 };
 
 /*  // OpenGL painting widget
