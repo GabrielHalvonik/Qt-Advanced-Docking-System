@@ -397,13 +397,17 @@ struct FloatingDockContainerPrivate
      */
     void cancelDragging()
     {
+        if (DraggingState == eDragState::DraggingInactive) return;
+
         Canceled = true;
+        
         if (auto floated = DockContainer->parentWidget(); floated)
         {
             if (MouseEventHandler)
             {
                 MouseEventHandler->releaseMouse();
             }
+            
             floated->move(DragStartPos);
             
             if (auto container = qobject_cast<CFloatingDockContainer*>(floated); container)
@@ -411,6 +415,7 @@ struct FloatingDockContainerPrivate
                 container->finishDragging(true);
             }
         }
+        
         DockManager->containerOverlay()->hideOverlay();
         DockManager->dockAreaOverlay()->hideOverlay();
         
