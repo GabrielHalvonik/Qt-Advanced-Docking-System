@@ -82,6 +82,7 @@ struct DockWidgetPrivate
 	QPointer<CDockManager> DockManager;
 	QPointer<CDockAreaWidget> DockArea;
 	QAction* ToggleViewAction = nullptr;
+    IFloatingWidget* CurrentFloating = nullptr;
 	bool Closed = false;
 	QScrollArea* ScrollArea = nullptr;
 	QToolBar* ToolBar = nullptr;
@@ -913,10 +914,26 @@ bool CDockWidget::eventFilter(QObject *watched, QEvent *event)
             event->type() == QEvent::MouseButtonPress &&
             mouseEvent->button() == Qt::MouseButton::LeftButton
         ) {
-            d->DockManager->addDockWidgetFloating(this);
+            d->CurrentFloating = tabWidget()->startFloating(eDragState::DraggingFloatingWidget, mouseEvent->pos());
+            eventHandled = true;
+        }
+        else if (event->type() == QEvent::MouseMove)
+        {
+            if (d->CurrentFloating) d->CurrentFloating->moveFloating();
+            eventHandled = true;
+        }
+        else if (event->type() == QEvent::MouseButtonRelease)
+        {
+            if (d->CurrentFloating)
+            {
+                d->CurrentFloating->finishDragging();
+                d->CurrentFloating = nullptr;
+            }
+            
+            eventHandled = true;
         }
     }
-    else if (auto container = floatingDockContainer(); container != nullptr)
+    else if (auto container = floatingDockContainer(); container)
     {
         if (
             auto mouseEvent = static_cast<QMouseEvent*>(event); mouseEvent &&
@@ -945,7 +962,10 @@ bool CDockWidget::eventFilter(QObject *watched, QEvent *event)
             event->type() == QEvent::MouseButtonRelease ||
             event->type() == QEvent::MouseMove
         ) {
-            QCoreApplication::sendEvent(dockAreaWidget()->titleBar(), event);
+            if (!isTabbed())
+            {
+                QCoreApplication::sendEvent(dockAreaWidget()->titleBar(), event);
+            }
             eventHandled = true;
         }
     }

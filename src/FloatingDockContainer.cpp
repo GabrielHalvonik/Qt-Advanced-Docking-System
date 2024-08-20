@@ -47,6 +47,9 @@
 #include "DockOverlay.h"
 #include "DockSnappingManager.h"
 #include "FloatingHelper.h"
+#include "DockAreaTitleBar.h"
+#include "DockAreaTabBar.h"
+#include "DockWidgetTab.h"
 
 #ifdef Q_OS_WIN
 #include <windows.h>

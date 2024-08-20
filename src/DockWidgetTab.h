@@ -37,6 +37,8 @@
 
 namespace ads
 {
+
+class IFloatingWidget;
 class CDockWidget;
 class CDockAreaWidget;
 struct DockWidgetTabPrivate;
@@ -183,6 +185,8 @@ public:
      * Use this function to determine if the tab is currently being dragged
      */
     eDragState dragState() const;
+    
+    IFloatingWidget* startFloating(eDragState DraggingState = DraggingFloatingWidget, const QPoint& pos = QPoint(-1, -1));
     
 public Q_SLOTS:
 	virtual void setVisible(bool visible) override;

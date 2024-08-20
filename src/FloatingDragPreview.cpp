@@ -65,12 +65,21 @@ struct FloatingDragPreviewPrivate
 	 * Cancel dragging and emit the draggingCanceled event
 	 */
 	void cancelDragging()
-	{
+    {
+        if (auto widget = qobject_cast<CDockWidget*>(Content); widget)
+        {
+            if (auto area = widget->dockAreaWidget(); area)
+            {
+                area->titleBar()->tabBar()->show();
+                area->setCurrentIndex(DraggedTabBarIndex);
+            }
+        }
+       
 		Canceled = true;
 		Q_EMIT _this->draggingCanceled();
 		DockManager->containerOverlay()->hideOverlay();
 		DockManager->dockAreaOverlay()->hideOverlay();
-        ContentSourceArea->show();
+        if (ContentSourceArea) ContentSourceArea->show();
 		_this->close();
 	}
 

@@ -107,7 +107,7 @@ struct DockWidgetTabPrivate
 	 * Returns true, if floating has been started and false if floating
 	 * is not possible for any reason
 	 */
-	bool startFloating(eDragState DraggingState = DraggingFloatingWidget);
+    IFloatingWidget* startFloating(eDragState DraggingState = DraggingFloatingWidget, const QPoint& pos = QPoint(-1, -1));
 
 	/**
 	 * Returns true if the given config flag is set
@@ -298,7 +298,7 @@ void DockWidgetTabPrivate::moveTab(QMouseEvent* ev)
 
 
 //============================================================================
-bool DockWidgetTabPrivate::startFloating(eDragState DraggingState)
+IFloatingWidget* DockWidgetTabPrivate::startFloating(eDragState DraggingState, const QPoint& pos)
 {
 	auto dockContainer = DockWidget->dockContainer();
     ADS_PRINT("isFloating " << dockContainer->isFloating());
@@ -311,7 +311,7 @@ bool DockWidgetTabPrivate::startFloating(eDragState DraggingState)
 	 && (dockContainer->visibleDockAreaCount() == 1)
 	 && (DockWidget->dockAreaWidget()->dockWidgetsCount() == 1))
 	{
-		return false;
+		return nullptr;
 	}
 
     ADS_PRINT("startFloating");
@@ -336,7 +336,7 @@ bool DockWidgetTabPrivate::startFloating(eDragState DraggingState)
 
     if (DraggingFloatingWidget == DraggingState)
     {
-        FloatingWidget->startFloating(DragStartMousePosition, Size, DraggingFloatingWidget, _this);
+        FloatingWidget->startFloating((pos != QPoint(-1, -1)) ? pos : DragStartMousePosition, Size, DraggingFloatingWidget, _this);
         auto DockManager = DockWidget->dockManager();
     	auto Overlay = DockManager->containerOverlay();
     	Overlay->setAllowedAreas(OuterDockAreas);
@@ -348,7 +348,7 @@ bool DockWidgetTabPrivate::startFloating(eDragState DraggingState)
      	FloatingWidget->startFloating(DragStartMousePosition, Size, DraggingInactive, nullptr);
     }
 
-	return true;
+	return FloatingWidget;
 }
 
 
@@ -579,9 +579,9 @@ void CDockWidgetTab::setActiveTab(bool active)
 {
     d->updateCloseButtonVisibility(active);
 
-	if(CDockManager::testConfigFlag(CDockManager::ShowTabTextOnlyForActiveTab) && !d->Icon.isNull())
+	if (CDockManager::testConfigFlag(CDockManager::ShowTabTextOnlyForActiveTab) && !d->Icon.isNull())
 	{
-		if(active)
+		if (active)
 			d->TitleLabel->setVisible(true);
 		else
 			d->TitleLabel->setVisible(false);
@@ -793,6 +793,11 @@ eDragState CDockWidgetTab::dragState() const
     return d->DragState;
 }
 
+//============================================================================
+IFloatingWidget* CDockWidgetTab::startFloating(eDragState DraggingState, const QPoint& pos)
+{
+    return d->startFloating(DraggingState, pos);
+}
 
 //============================================================================
 void CDockWidgetTab::onDockWidgetFeaturesChanged()
