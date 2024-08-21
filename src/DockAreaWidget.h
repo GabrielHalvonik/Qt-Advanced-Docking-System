@@ -386,7 +386,11 @@ public:
      * this function returns true
      */
     bool isTopLevelArea() const;
-
+    
+    bool isConvered() const;
+    
+    bool setCovered(bool value);
+    
 
 public Q_SLOTS:
 	/**

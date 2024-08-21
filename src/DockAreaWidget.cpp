@@ -260,6 +260,7 @@ struct DockAreaWidgetPrivate
 	CDockManager*		DockManager		= nullptr;
 	CAutoHideDockContainer* AutoHideDockContainer = nullptr;
 	bool UpdateTitleBarButtons = false;
+    bool IsCovered = false;
 	DockWidgetAreas		AllowedAreas	= DefaultAllowedAreas;
 	QSize MinSizeHint;
 	CDockAreaWidget::DockAreaFlags Flags{CDockAreaWidget::DefaultFlags};
@@ -1487,6 +1488,28 @@ bool CDockAreaWidget::isTopLevelArea() const
 	}
 
 	return (Container->topLevelDockArea() == this);
+}
+
+bool CDockAreaWidget::isConvered() const
+{
+    return d->IsCovered;
+}
+
+bool CDockAreaWidget::setCovered(bool value)
+{
+    d->IsCovered = value;
+    
+    if (auto container = dockContainer(); container)
+    {
+        if (auto floating = container->floatingWidget(); floating)
+        {
+            floating->setWindowOpacity(value ? internal::CoveredDockOpacity : 1.0);
+            
+            return !floating->isCurrentlyDragged();
+        }
+    }
+    
+    return false;
 }
 
 

@@ -378,6 +378,7 @@ struct FloatingDockContainerPrivate
     QPoint DragStartPos;
     bool Hiding = false;
     bool AutoHideChildren = true;
+    bool IsCurrentlyDragged = false;
     bool IsSnapped = false;
     bool Canceled = false;
     QWidget* MouseEventHandler = nullptr;
@@ -401,6 +402,8 @@ struct FloatingDockContainerPrivate
     void cancelDragging()
     {
         if (DraggingState == eDragState::DraggingInactive) return;
+        
+        IsCurrentlyDragged = false;
 
         Canceled = true;
         
@@ -1090,6 +1093,8 @@ void CFloatingDockContainer::startDragging(const QPoint &DragStartMousePos, cons
 {
     d->MouseEventHandler = MouseEventHandler;
     
+    d->IsCurrentlyDragged = true;
+    
     if (QGuiApplication::keyboardModifiers() & Qt::ShiftModifier)
     {
         DockSnappingManager::instance().draggingStarted(DragStartMousePos, this);
@@ -1176,6 +1181,11 @@ bool CFloatingDockContainer::isClosable() const
 {
     return d->DockContainer->features().testFlag(
         CDockWidget::DockWidgetClosable);
+}
+
+bool CFloatingDockContainer::isCurrentlyDragged() const
+{
+    return d->IsCurrentlyDragged;
 }
 
 //============================================================================
@@ -1311,6 +1321,8 @@ void CFloatingDockContainer::finishDragging(bool forced)
         d->MouseEventHandler = nullptr;
     }
 #endif
+    
+    d->IsCurrentlyDragged = false;
     
     setWindowOpacity(1);
     

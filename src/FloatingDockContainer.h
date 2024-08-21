@@ -244,7 +244,11 @@ public:
 	 * It can be closed, if all dock widgets in all dock areas can be closed
 	 */
     bool isClosable() const;
-
+    
+    
+    bool isCurrentlyDragged() const;
+    
+    
     /**
      * This function returns true, if this floating widget has only one single
      * visible dock widget in a single visible dock area.

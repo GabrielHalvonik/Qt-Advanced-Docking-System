@@ -162,6 +162,7 @@ Q_ENUMS(SideBarLocation)
 namespace internal
 {
 static const qreal DraggingDockOpacity = 0.6;
+static const qreal CoveredDockOpacity = 0.4;
 static const bool RestoreTesting = true;
 static const int DockMarginSize = 0;
 static const bool Restore = false;

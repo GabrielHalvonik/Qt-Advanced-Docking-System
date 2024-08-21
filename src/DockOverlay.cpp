@@ -65,6 +65,7 @@ struct DockOverlayPrivate
 	bool DropPreviewEnabled = true;
 	CDockOverlay::eMode Mode = CDockOverlay::ModeDockAreaOverlay;
 	QRect DropAreaRect;
+    std::vector<CDockAreaWidget*> CoveredDockAreas;
 	int TabIndex = InvalidTabIndex;
 
 	/**
@@ -615,7 +616,7 @@ DockWidgetArea CDockOverlay::visibleDropAreaUnderCursor() const
 //============================================================================
 DockWidgetArea CDockOverlay::showOverlay(QWidget* target)
 {
-	if (d->TargetWidget == target)
+    if (d->TargetWidget == target)
 	{
 		DockWidgetArea da = dropAreaUnderCursor();
         
@@ -652,6 +653,40 @@ DockWidgetArea CDockOverlay::showOverlay(QWidget* target)
     d->Cross->updatePosition();
 	d->Cross->updateOverlayIcons();
     
+    for (auto covered : d->CoveredDockAreas)
+    {
+        covered->setCovered(false);
+    }
+    d->CoveredDockAreas.clear();
+    
+    if (auto casted = qobject_cast<CDockAreaWidget*>(d->TargetWidget)) 
+    {
+        for (auto indicator : d->Cross->d->DropIndicatorWidgets) 
+        {
+            QRect indicatorGlobal = QRect(indicator->mapToGlobal(indicator->rect().topLeft()), indicator->size());
+            
+            for (auto container : casted->dockManager()->dockContainers()) 
+            {
+                for (auto area : container->openedDockAreas()) 
+                {
+                    if (casted == area) continue;
+                    if (casted->dockContainer()->zOrderIndex() > container->zOrderIndex()) continue;
+                    
+                    QRect areaGlobal = QRect(area->mapToGlobal(area->rect().topLeft()), area->size());
+                    
+                    if (indicatorGlobal.intersects(areaGlobal)) 
+                    {
+                        if (area->setCovered(true))
+                        {
+                            d->CoveredDockAreas.push_back(area);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    
 	return dropAreaUnderCursor();
 }
 
@@ -659,6 +694,12 @@ DockWidgetArea CDockOverlay::showOverlay(QWidget* target)
 //============================================================================
 void CDockOverlay::hideOverlay()
 {
+    for (auto covered : d->CoveredDockAreas)
+    {
+        covered->setCovered(false);
+    }
+    d->CoveredDockAreas.clear();
+    
 	hide();
 	d->TargetWidget.clear();
 	d->LastLocation = InvalidDockWidgetArea;

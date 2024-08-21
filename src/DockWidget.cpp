@@ -1201,7 +1201,7 @@ void CDockWidget::setFloating()
 	{
 		return;
 	}
-
+    
 	if (this->isAutoHide())
 	{
 		dockAreaWidget()->setFloating();
