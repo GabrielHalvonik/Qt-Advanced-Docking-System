@@ -74,13 +74,13 @@ struct FloatingDragPreviewPrivate
                 area->setCurrentIndex(DraggedTabBarIndex);
             }
         }
-       
+        
 		Canceled = true;
 		Q_EMIT _this->draggingCanceled();
 		DockManager->containerOverlay()->hideOverlay();
+        _this->hide();
 		DockManager->dockAreaOverlay()->hideOverlay();
         if (ContentSourceArea) ContentSourceArea->show();
-		_this->close();
 	}
 
 	/**
@@ -288,6 +288,11 @@ CFloatingDragPreview::CFloatingDragPreview(CDockAreaWidget* Content)
 CFloatingDragPreview::~CFloatingDragPreview()
 {
 	delete d;
+}
+
+bool CFloatingDragPreview::isCanceled() const
+{
+    return d->Canceled;
 }
 
 

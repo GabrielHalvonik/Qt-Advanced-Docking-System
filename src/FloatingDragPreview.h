@@ -67,6 +67,8 @@ public:
 	 * Delete private data
 	 */
 	~CFloatingDragPreview();
+    
+    bool isCanceled() const;
 
     /**
      * We filter the events of the assigned content widget to receive

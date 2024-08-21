@@ -59,6 +59,7 @@
 #include "DockSplitter.h"
 #include "DockComponentsFactory.h"
 #include "ads_globals.h"
+#include "FloatingDragPreview.h"
 
 
 namespace ads
@@ -82,7 +83,7 @@ struct DockWidgetPrivate
 	QPointer<CDockManager> DockManager;
 	QPointer<CDockAreaWidget> DockArea;
 	QAction* ToggleViewAction = nullptr;
-    IFloatingWidget* CurrentFloating = nullptr;
+    CFloatingDragPreview* CurrentFloating = nullptr;
 	bool Closed = false;
 	QScrollArea* ScrollArea = nullptr;
 	QToolBar* ToolBar = nullptr;
@@ -914,11 +915,18 @@ bool CDockWidget::eventFilter(QObject *watched, QEvent *event)
             event->type() == QEvent::MouseButtonPress &&
             mouseEvent->button() == Qt::MouseButton::LeftButton
         ) {
-            d->CurrentFloating = tabWidget()->startFloating(eDragState::DraggingFloatingWidget, mouseEvent->pos());
+            d->CurrentFloating = dynamic_cast<CFloatingDragPreview*>(
+                tabWidget()->startFloating(eDragState::DraggingFloatingWidget, mouseEvent->pos())
+            );
             eventHandled = true;
         }
         else if (event->type() == QEvent::MouseMove)
         {
+            if (d->CurrentFloating && d->CurrentFloating->isCanceled())
+            {
+                d->CurrentFloating = nullptr;
+            }
+            
             if (d->CurrentFloating) d->CurrentFloating->moveFloating();
             eventHandled = true;
         }
