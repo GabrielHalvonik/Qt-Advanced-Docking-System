@@ -918,12 +918,14 @@ bool CDockWidget::eventFilter(QObject *watched, QEvent *event)
             d->CurrentFloating = dynamic_cast<CFloatingDragPreview*>(
                 tabWidget()->startFloating(eDragState::DraggingFloatingWidget, mouseEvent->pos())
             );
+            d->CurrentFloating->installEventFilter(this);
             eventHandled = true;
         }
         else if (event->type() == QEvent::MouseMove)
         {
             if (d->CurrentFloating && d->CurrentFloating->isCanceled())
             {
+                d->CurrentFloating->removeEventFilter(this);
                 d->CurrentFloating = nullptr;
             }
             
@@ -934,6 +936,7 @@ bool CDockWidget::eventFilter(QObject *watched, QEvent *event)
         {
             if (d->CurrentFloating)
             {
+                d->CurrentFloating->removeEventFilter(this);
                 d->CurrentFloating->finishDragging();
                 d->CurrentFloating = nullptr;
             }

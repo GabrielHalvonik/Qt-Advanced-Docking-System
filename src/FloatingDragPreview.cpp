@@ -509,6 +509,11 @@ bool CFloatingDragPreview::eventFilter(QObject *watched, QEvent *event)
 {
 	Q_UNUSED(watched);
     
+    if ((event->type() == QEvent::Leave || event->type() == QEvent::Enter)) {
+        event->accept();        
+        return true;
+    }
+    
     if (!d->Canceled)
     {
         if (event->type() == QEvent::MouseButtonPress)
