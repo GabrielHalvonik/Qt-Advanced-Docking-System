@@ -80,6 +80,9 @@ public:
 	 * Virtual Destructor
 	 */
 	virtual ~CDockAreaTabBar();
+    
+    
+    void setAllTabsVisible();
 
 	/**
 	 * Inserts the given dock widget tab at the given position.

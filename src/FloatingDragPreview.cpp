@@ -39,9 +39,9 @@ namespace ads
 struct FloatingDragPreviewPrivate
 {
 	CFloatingDragPreview *_this;
-	QWidget* Content;
+	QWidget *Content;
 	CDockWidget::DockWidgetFeatures ContentFeatures;
-	CDockAreaWidget* ContentSourceArea = nullptr;
+	CDockAreaWidget *ContentSourceArea = nullptr;
 	QPoint DragStartMousePosition;
 	CDockManager* DockManager;
 	CDockContainerWidget *DropContainer = nullptr;
@@ -72,8 +72,24 @@ struct FloatingDragPreviewPrivate
         {
             if (auto area = widget->dockAreaWidget(); area)
             {
-                area->titleBar()->tabBar()->show();
-                area->setCurrentIndex(DraggedTabBarIndex);
+                if (auto tab = area->titleBar()->tabBar(); tab)
+                {
+                    if (tab->isHidden())
+                    {
+                        tab->show();
+                    }
+                    tab->currentTab()->show();
+                    area->setCurrentIndex(DraggedTabBarIndex);
+                }
+                
+                if (auto bar = area->currentDockWidget()->toolBar(); bar)
+                {
+                    bar->setStyleSheet(QString("QWidget { background-color: %0; }").arg(internal::ToolBarHighlightedColor));
+                        
+                    QTimer::singleShot(350, [bar] {
+                        bar->setStyleSheet(QString("QWidget { background-color: %0; }").arg(internal::ToolBarColor));
+                    });
+                }
             }
         }
         
@@ -367,7 +383,12 @@ void CFloatingDragPreview::startFloating(const QPoint &DragStartMousePos,
             }
             
             area->setCurrentDockWidget(desired);
-            area->titleBar()->tabBar()->hide();
+            
+            area->titleBar()->tabBar()->currentTab()->hide();
+            if (area->titleBar()->tabBar()->count() <= 2)
+            {
+                area->titleBar()->tabBar()->hide();
+            }
         }
     }
     else if (d && d->ContentSourceArea)
@@ -386,6 +407,8 @@ void CFloatingDragPreview::startFloating(const QPoint &DragStartMousePos,
 void CFloatingDragPreview::finishDragging(bool)
 {
 	ADS_PRINT("CFloatingDragPreview::finishDragging");
+    
+    if (d->Canceled) return;    
     
     if (auto widget = qobject_cast<CDockWidget*>(d->Content); widget && widget->isTabbed())
     {
@@ -423,6 +446,14 @@ void CFloatingDragPreview::finishDragging(bool)
             d->DropContainer->dockAreaAt(QCursor::pos()),
             d->DockManager->dockAreaOverlay()->tabIndexUnderCursor()
         );
+        
+        if (auto widget = qobject_cast<CDockWidget*>(d->Content); widget)
+        {
+            if (auto area = widget->dockAreaWidget(); area)
+            {
+                area->titleBar()->tabBar()->setAllTabsVisible();
+            }
+        }
 	}
 	else if (ContainerDropArea != InvalidDockWidgetArea)
 	{

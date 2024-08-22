@@ -155,6 +155,17 @@ CDockAreaTabBar::~CDockAreaTabBar()
 	delete d;
 }
 
+void CDockAreaTabBar::setAllTabsVisible()
+{
+    for (int i = 0; i < d->TabsLayout->count(); ++i) {
+        auto item = d->TabsLayout->itemAt(i);
+        if (item && item->widget() && item->widget()->isHidden())
+        {
+            item->widget()->show();
+        }
+    }
+}
+
 
 //============================================================================
 void CDockAreaTabBar::wheelEvent(QWheelEvent* Event)
