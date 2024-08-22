@@ -39,6 +39,8 @@
 #include <QTime>
 #include <QScreen>
 #include <QSizeGrip>
+#include <QTimer>
+#include <QToolBar>
 
 #include "DockContainerWidget.h"
 #include "DockAreaWidget.h"
@@ -418,8 +420,16 @@ struct FloatingDockContainerPrivate
             
             if (auto container = qobject_cast<CFloatingDockContainer*>(floated); container)
             {
-                container->finishDragging(true);
+                if (auto bar = DockContainer->topLevelDockArea()->currentDockWidget()->toolBar(); bar)
+                {
+                    bar->setStyleSheet(QString("QWidget { background-color: %0; }").arg(internal::ToolBarHighlightedColor));
+                    
+                    QTimer::singleShot(350, [bar] {
+                        bar->setStyleSheet(QString("QWidget { background-color: %0; }").arg(internal::ToolBarColor));
+                    });
+                }
             }
+            
         }
         
         DockManager->containerOverlay()->hideOverlay();

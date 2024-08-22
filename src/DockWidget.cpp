@@ -299,7 +299,7 @@ void DockWidgetPrivate::setupToolBar()
 	ToolBar = new QToolBar(_this);
 	ToolBar->setObjectName("dockWidgetToolBar");
 	Layout->insertWidget(0, ToolBar);
-    ToolBar->setStyleSheet("QWidget { background-color: rgb(80, 80, 80); }");                // todo: replace with proper qss
+    ToolBar->setStyleSheet(QString("QWidget { background-color: %0; }").arg(internal::ToolBarColor));                // todo: replace with proper qss
     // ToolBar->setMinimumHeight(24);
 	ToolBar->setIconSize(QSize(16, 16));
 	ToolBar->toggleViewAction()->setEnabled(false);

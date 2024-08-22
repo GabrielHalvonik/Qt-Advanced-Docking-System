@@ -15,6 +15,8 @@
 #include <QApplication>
 #include <QPainter>
 #include <QKeyEvent>
+#include <QTimer>
+#include <QToolBar>
 
 #include "DockWidget.h"
 #include "DockAreaWidget.h"
@@ -72,6 +74,21 @@ struct FloatingDragPreviewPrivate
             {
                 area->titleBar()->tabBar()->show();
                 area->setCurrentIndex(DraggedTabBarIndex);
+            }
+        }
+        
+        if (ContentSourceArea)
+        {
+            if (ContentSourceArea->currentDockWidget())
+            {
+                if (auto bar = ContentSourceArea->currentDockWidget()->toolBar(); bar)
+                {
+                    bar->setStyleSheet(QString("QWidget { background-color: %0; }").arg(internal::ToolBarHighlightedColor));
+                    
+                    QTimer::singleShot(350, [bar] {
+                        bar->setStyleSheet(QString("QWidget { background-color: %0; }").arg(internal::ToolBarColor));
+                    });
+                }
             }
         }
         
