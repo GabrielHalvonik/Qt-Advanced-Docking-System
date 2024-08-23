@@ -429,7 +429,6 @@ struct FloatingDockContainerPrivate
                     });
                 }
             }
-            
         }
         
         DockManager->containerOverlay()->hideOverlay();
@@ -1040,7 +1039,7 @@ bool CFloatingDockContainer::eventFilter(QObject *watched, QEvent *event)
                 mouseEvent->button() == Qt::MouseButton::RightButton
             ) {
                 watched->removeEventFilter(this);
-                d->cancelDragging();
+                cancelDragging();
             }
         }
         
@@ -1051,7 +1050,7 @@ bool CFloatingDockContainer::eventFilter(QObject *watched, QEvent *event)
                 keyEvent->key() == Qt::Key_Escape
             ) {
                 watched->removeEventFilter(this);
-                d->cancelDragging();
+                cancelDragging();
             }
         }
     }
@@ -1353,6 +1352,12 @@ void CFloatingDockContainer::finishDragging(bool forced)
 void CFloatingDockContainer::cancelDragging()
 {
     d->cancelDragging();
+    
+    setWindowOpacity(1);
+    
+    QPalette pal;
+    pal.setBrush(QPalette::Current, QPalette::Window, palette().color(QPalette::Disabled, QPalette::Base));
+    setPalette(pal);
 }
 
 #ifdef Q_OS_MACOS
