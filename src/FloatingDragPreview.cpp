@@ -349,6 +349,11 @@ void CFloatingDragPreview::moveFloating()
   
 }
 
+void CFloatingDragPreview::cancelDragging()
+{
+    d->cancelDragging();
+}
+
 
 //============================================================================
 void CFloatingDragPreview::startFloating(const QPoint &DragStartMousePos,

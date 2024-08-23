@@ -94,6 +94,9 @@ public:
 	 * to finish the dragging
 	 */
 	virtual void finishDragging(bool forced = false) = 0;
+    
+    
+    virtual void cancelDragging() = 0;
 };
 
 
@@ -146,7 +149,10 @@ protected:
 	 * finished
 	 */
 	virtual void finishDragging(bool forced = false) override;
-
+    
+    
+    virtual void cancelDragging() override;
+    
 	/**
 	 * This function deletes all dock widgets in it.
 	 * This functions should be called only from dock manager in its
@@ -312,7 +318,7 @@ public:
 	 */
 	bool hasNativeTitleBar();
 #endif
-
+    
 }; // class FloatingDockContainer
 }
  // namespace ads

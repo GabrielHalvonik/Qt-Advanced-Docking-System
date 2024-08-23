@@ -403,11 +403,11 @@ struct FloatingDockContainerPrivate
      */
     void cancelDragging()
     {
-        if (DraggingState == eDragState::DraggingInactive) return;
+        Canceled = true;
+        
+        if (!IsCurrentlyDragged || DraggingState == eDragState::DraggingInactive || IsSnapped) return;
         
         IsCurrentlyDragged = false;
-
-        Canceled = true;
         
         if (auto floated = DockContainer->parentWidget(); floated)
         {
@@ -1107,7 +1107,7 @@ void CFloatingDockContainer::startDragging(const QPoint &DragStartMousePos, cons
     
     if (QGuiApplication::keyboardModifiers() & Qt::ShiftModifier)
     {
-        DockSnappingManager::instance().draggingStarted(DragStartMousePos, this);
+        DockSnappingManager::instance().draggingStarted(QCursor::pos(), DragStartMousePos, this);
         d->IsSnapped = DockSnappingManager::instance().tryStoreSnappedChain(d->DockManager, this);
     }
     else
@@ -1348,6 +1348,11 @@ void CFloatingDockContainer::finishDragging(bool forced)
             DockSnappingManager::instance().draggingFinished();
         }
     }
+}
+
+void CFloatingDockContainer::cancelDragging()
+{
+    d->cancelDragging();
 }
 
 #ifdef Q_OS_MACOS

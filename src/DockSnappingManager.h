@@ -3,20 +3,19 @@
 #include <tuple>
 #include <vector>
 
-#include <QCursor>
-#include <QEvent>
-#include <QMouseEvent>
-#include <QWidget>
 #include <QObject>
 #include <QPoint>
 #include <QRect>
-#include <QApplication>
-#include <QScreen>
+
+class QEvent;
+class QWidget;
+class QScreen;
 
 namespace ads
 {
 
 class CDockManager;
+class IFloatingWidget;
 class CFloatingDockContainer;
 
 class DockSnappingManager
@@ -25,7 +24,7 @@ public:
 
     static DockSnappingManager& instance();
     
-    void draggingStarted(const QPoint& offset, QWidget* source);
+    void draggingStarted(const QPoint& started, const QPoint& offset, IFloatingWidget* source);
     void draggingFinished();
     
     std::tuple<bool, QPoint> getSnapPoint(QWidget* preview, CDockManager* manager, const QPoint& dragStartMousePosition);
@@ -35,19 +34,21 @@ public:
     bool tryStoreSnappedChain(CDockManager* manager, CFloatingDockContainer* target);
     void clearSnappedChain();
     
-    QRect calculateSnappedBoundingBox(std::vector<CFloatingDockContainer*>& containers);
+    QRect calculateSnappedBoundingBox(std::vector<std::tuple<CFloatingDockContainer*, QPoint>>& containers);
     
 public:
     const int SnapDistance = 15;
     
 private:
     DockSnappingManager();
-    std::vector<CFloatingDockContainer*> querySnappedChain(CDockManager* manager, CFloatingDockContainer* target);
+    
+    void cancelDragging();
+    std::vector<std::tuple<CFloatingDockContainer*, QPoint>> querySnappedChain(CDockManager* manager, CFloatingDockContainer* target);
     
 private:
     QPoint lastPosition;
-    struct { QPoint offset; QWidget* widget; } draggingSourceWidget;
-    std::vector<CFloatingDockContainer*> snappedDockGroup;
+    struct { QPoint started; QPoint offset; IFloatingWidget* widget; } draggingSourceWidget;
+    std::vector<std::tuple<CFloatingDockContainer*, QPoint>> snappedDockGroup;
     
 private:
     class DockScreenRelocationEventFilter : public QObject
@@ -56,28 +57,13 @@ private:
         DockScreenRelocationEventFilter(DockSnappingManager* owner) : owner(owner) { }
         
         bool isActive = false;
+        
     public:
-        bool eventFilter(QObject*, QEvent* event) override
-        {
-            if (auto mouseEvent = static_cast<QMouseEvent*>(event); mouseEvent)
-            {
-                if (auto screen = QApplication::screenAt(QCursor::pos()))
-                {
-                    auto source = owner->draggingSourceWidget;
-                    if (source.widget != nullptr)
-                    {
-                        auto cursorScreen = QApplication::screenAt(QCursor::pos());
-                        if (source.widget->screen() != cursorScreen)
-                        {
-                            owner->moveSnappedDockGroup(source.widget, QCursor::pos(), source.offset, cursorScreen);
-                        }
-                    }
-                }
-            }
-            return false;
-        }
+        bool eventFilter(QObject*, QEvent* event) override;
+        
     private:
         DockSnappingManager* owner;
+        
     } dockScreenRelocationEventFilter { this };
 };
 

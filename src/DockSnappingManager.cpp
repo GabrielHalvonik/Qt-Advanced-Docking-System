@@ -24,15 +24,31 @@ DockSnappingManager::DockSnappingManager()
     // });
 }
 
+void DockSnappingManager::cancelDragging()
+{
+    auto source = draggingSourceWidget;
+    
+    if (source.widget != nullptr)
+    {
+        if (auto widget = dynamic_cast<QWidget*>(source.widget); widget)
+        {
+            draggingSourceWidget.widget->cancelDragging();
+            moveSnappedDockGroup(widget, source.started, source.started - QCursor::pos() + QCursor::pos() - widget->mapToGlobal(source.offset), QGuiApplication::screenAt(source.started));
+        }
+    }
+    
+    draggingFinished();
+}
+
 DockSnappingManager& DockSnappingManager::instance()
 {
     static DockSnappingManager Instance;
     return Instance;
 }
 
-void DockSnappingManager::draggingStarted(const QPoint& offset, QWidget* source)
+void DockSnappingManager::draggingStarted(const QPoint& started, const QPoint& offset, IFloatingWidget* source)
 {
-    draggingSourceWidget = { offset, source };
+    draggingSourceWidget = { started, offset, source };
     
     if (!dockScreenRelocationEventFilter.isActive)
     {
@@ -59,6 +75,7 @@ std::tuple<bool, QPoint> DockSnappingManager::getSnapPoint(QWidget* preview, CDo
         QPoint position;
         std::vector<CFloatingDockContainer*> snappingCandidates;
     } bestSnap { };
+    
     int bestSnapDistance = SnapDistance;
 
     QRect previewRect = preview->geometry();
@@ -160,7 +177,8 @@ void DockSnappingManager::moveSnappedDockGroup(QWidget* owner, const QPoint& cur
     {
         for (auto item : snappedDockGroup)
         {
-            item->move(item->pos() + offset - overhang);
+            auto widget = std::get<0>(item);
+            widget->move(widget->pos() + offset - overhang);
         }
 
         if (snappedDockGroup.empty())
@@ -190,13 +208,15 @@ void DockSnappingManager::moveSnappedDockGroup(QWidget* owner, const QPoint& cur
         {
             for (auto item : snappedDockGroup)
             {
+                auto widget = std::get<0>(item);
+                
                 if (delta == QPoint())
                 {
-                    item->move(item->pos() + offset);
+                    widget->move(widget->pos() + offset);
                 }
                 else
                 {
-                    item->move(item->pos() + delta);
+                    widget->move(widget->pos() + delta);
                 }
             }
 
@@ -215,9 +235,9 @@ void DockSnappingManager::moveSnappedDockGroup(QWidget* owner, const QPoint& cur
     }
 }
 
-std::vector<CFloatingDockContainer*> DockSnappingManager::querySnappedChain(CDockManager* manager, CFloatingDockContainer* target)
+std::vector<std::tuple<CFloatingDockContainer*, QPoint>> DockSnappingManager::querySnappedChain(CDockManager* manager, CFloatingDockContainer* target)
 {
-    std::vector<CFloatingDockContainer*> chain;
+    std::vector<std::tuple<CFloatingDockContainer*, QPoint>> chain;
     std::unordered_set<CFloatingDockContainer*> visited;
     std::queue<CFloatingDockContainer*> toVisit;
 
@@ -230,7 +250,7 @@ std::vector<CFloatingDockContainer*> DockSnappingManager::querySnappedChain(CDoc
         toVisit.pop();
         // if (current != target)
         // {
-            chain.push_back(current);
+            chain.push_back({ current, current->pos() });
         // }
 
         QRect currentRect = current->geometry();
@@ -284,15 +304,15 @@ std::vector<CFloatingDockContainer*> DockSnappingManager::querySnappedChain(CDoc
     return chain;
 }
 
-QRect DockSnappingManager::calculateSnappedBoundingBox(std::vector<CFloatingDockContainer*>& containers) {
+QRect DockSnappingManager::calculateSnappedBoundingBox(std::vector<std::tuple<CFloatingDockContainer*, QPoint>>& containers) {
     if (containers.empty()) {
         return QRect();
     }
 
-    QRect boundingBox = containers[0]->geometry();
+    QRect boundingBox = std::get<0>(containers[0])->geometry();
 
     for (size_t i = 0; i < containers.size(); ++i) {
-        boundingBox = boundingBox.united(containers[i]->geometry());
+        boundingBox = boundingBox.united(std::get<0>(containers[i])->geometry());
     }
 
     return boundingBox;
@@ -307,6 +327,57 @@ bool DockSnappingManager::tryStoreSnappedChain(CDockManager* manager, CFloatingD
 void DockSnappingManager::clearSnappedChain()
 {
     snappedDockGroup.clear();
+}
+
+bool DockSnappingManager::DockScreenRelocationEventFilter::eventFilter(QObject*, QEvent* event)
+{
+    if (event->type() == QEvent::KeyPress)
+    {
+        if (auto keyEvent = static_cast<QKeyEvent*>(event); keyEvent)
+        {
+            if (keyEvent->key() == Qt::Key_Escape)
+            {
+                owner->cancelDragging();
+                
+                return true;
+            }
+        }
+    }
+    else if (event->type() == QEvent::MouseButtonPress)
+    {
+        if (auto mouseEvent = static_cast<QMouseEvent*>(event); mouseEvent)
+        {
+            if (mouseEvent->button() == Qt::RightButton)
+            {
+                owner->cancelDragging();
+                
+                return true;
+            }
+        } 
+    }
+    else if (event->type() == QEvent::MouseMove)
+    {
+        if (auto mouseEvent = static_cast<QMouseEvent*>(event); mouseEvent)
+        {
+            if (auto screen = QApplication::screenAt(QCursor::pos()))
+            {
+                auto source = owner->draggingSourceWidget;
+                if (source.widget != nullptr)
+                {
+                    auto cursorScreen = QApplication::screenAt(QCursor::pos());
+                    if (auto widget = dynamic_cast<QWidget*>(source.widget); widget)
+                    {
+                        if (widget->screen() != cursorScreen)
+                        {
+                            owner->moveSnappedDockGroup(widget, QCursor::pos(), source.offset, cursorScreen);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    return false;
 }
 
 }
