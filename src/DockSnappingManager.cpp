@@ -79,31 +79,45 @@ std::tuple<bool, QPoint> DockSnappingManager::getSnapPoint(QWidget* preview, CDo
     int bestSnapDistance = SnapDistance;
 
     QRect previewRect = preview->geometry();
+    
     QPoint previewCorners[4] = {
         preview->mapTo({}, previewRect.topLeft()),
         preview->mapTo({}, previewRect.topRight()),
         preview->mapTo({}, previewRect.bottomLeft()),
         preview->mapTo({}, previewRect.bottomRight()),
     };
-
+    
     int previewCornerIndices[8] { 0, 1, 2, 3, 0, 1, 2, 3 };
-
+    
     for (int i = 0; i < manager->dockContainers().size(); ++i)
     {
         auto container = manager->dockContainers()[i];
+        
         if (container->isFloating())
         {
             QPoint containerPos = container->parentWidget()->pos();
-            int containerWidth = container->geometry().width();
-            int containerHeight = container->geometry().height();
-
+            
+            int containerWidth;
+            int containerHeight;
+            
+            if (container->parentWidget() != nullptr)
+            {
+                containerWidth = container->parentWidget()->geometry().width();
+                containerHeight = container->parentWidget()->geometry().height();
+            }
+            else
+            {
+                containerWidth = container->geometry().width();
+                containerHeight = container->geometry().height();
+            }
+            
             QPoint containerCorners[4] = {
                 containerPos,
                 containerPos + QPoint(containerWidth, 0),
                 containerPos + QPoint(0, containerHeight),
                 containerPos + QPoint(containerWidth, containerHeight)
             };
-
+            
             int containerCornerIndices[8] { 1, 0, 3, 2, 2, 3, 0, 1 };
 
             for (uint8_t j = 0; j < 8; ++j)
@@ -304,14 +318,17 @@ std::vector<std::tuple<CFloatingDockContainer*, QPoint>> DockSnappingManager::qu
     return chain;
 }
 
-QRect DockSnappingManager::calculateSnappedBoundingBox(std::vector<std::tuple<CFloatingDockContainer*, QPoint>>& containers) {
-    if (containers.empty()) {
+QRect DockSnappingManager::calculateSnappedBoundingBox(std::vector<std::tuple<CFloatingDockContainer*, QPoint>>& containers)
+{
+    if (containers.empty())
+    {
         return QRect();
     }
 
     QRect boundingBox = std::get<0>(containers[0])->geometry();
 
-    for (size_t i = 0; i < containers.size(); ++i) {
+    for (size_t i = 0; i < containers.size(); ++i)
+    {
         boundingBox = boundingBox.united(std::get<0>(containers[i])->geometry());
     }
 
