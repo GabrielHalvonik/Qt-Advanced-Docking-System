@@ -8,27 +8,28 @@
 //============================================================================
 //                                   INCLUDES
 //============================================================================
-#include "AutoHideDockContainer.h"
 #include "FloatingDragPreview.h"
 
 #include <QEvent>
-#include <QApplication>
-#include <QPainter>
-#include <QKeyEvent>
 #include <QTimer>
+#include <QScreen>
+#include <QPainter>
 #include <QToolBar>
+#include <QKeyEvent>
+#include <QApplication>
 
-#include "DockWidget.h"
-#include "DockAreaWidget.h"
-#include "DockManager.h"
-#include "DockContainerWidget.h"
-#include "DockOverlay.h"
-#include "AutoHideDockContainer.h"
 #include "ads_globals.h"
-#include "DockSnappingManager.h"
+#include "DockWidget.h"
+#include "DockOverlay.h"
+#include "DockManager.h"
 #include "DockWidgetTab.h"
-#include "DockAreaTitleBar.h"
+#include "FloatingHelper.h"
+#include "DockAreaWidget.h"
 #include "DockAreaTabBar.h"
+#include "DockAreaTitleBar.h"
+#include "DockContainerWidget.h"
+#include "DockSnappingManager.h"
+#include "AutoHideDockContainer.h"
 
 namespace ads
 {
@@ -340,9 +341,13 @@ void CFloatingDragPreview::moveFloating()
     else
     {
         int borderSize = (frameSize().width() - size().width()) / 2;
-        const QPoint cursorPos = QCursor::pos();
-        QPoint moveToPos = cursorPos - d->DragStartMousePosition - QPoint(borderSize, 0);
-        move(moveToPos);
+        QPoint currentCursorPos = QCursor::pos();
+        QPoint moveToPos = currentCursorPos - d->DragStartMousePosition - QPoint(borderSize, 0) - QPoint(internal::DockMarginSize, internal::DockMarginSize);
+        QPoint offset = moveToPos - pos();
+        
+        auto cursorScreen = FloatingHelper::currentlyHoveredScreen();
+        auto overhang = FloatingHelper::calculateOverhang(cursorScreen->availableGeometry(), geometry().translated(offset));
+        move(moveToPos - overhang);
         
         d->updateDropOverlays(QCursor::pos());
     }
