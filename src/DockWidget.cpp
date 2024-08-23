@@ -84,6 +84,8 @@ struct DockWidgetPrivate
 	QPointer<CDockAreaWidget> DockArea;
 	QAction* ToggleViewAction = nullptr;
     CFloatingDragPreview* CurrentFloating = nullptr;
+    QPoint DragStartMousePos;
+    bool CanDragStart = false;
 	bool Closed = false;
 	QScrollArea* ScrollArea = nullptr;
 	QToolBar* ToolBar = nullptr;
@@ -915,10 +917,8 @@ bool CDockWidget::eventFilter(QObject *watched, QEvent *event)
             event->type() == QEvent::MouseButtonPress &&
             mouseEvent->button() == Qt::MouseButton::LeftButton
         ) {
-            d->CurrentFloating = dynamic_cast<CFloatingDragPreview*>(
-                tabWidget()->startFloating(eDragState::DraggingFloatingWidget, mouseEvent->pos())
-            );
-            d->CurrentFloating->installEventFilter(this);
+            d->DragStartMousePos = QCursor::pos();
+            d->CanDragStart = true;
             eventHandled = true;
         }
         else if (event->type() == QEvent::MouseMove)
@@ -927,9 +927,22 @@ bool CDockWidget::eventFilter(QObject *watched, QEvent *event)
             {
                 d->CurrentFloating->removeEventFilter(this);
                 d->CurrentFloating = nullptr;
+                d->CanDragStart = false;
             }
-            
-            if (d->CurrentFloating) d->CurrentFloating->moveFloating();
+            else if (d->CurrentFloating)
+            {
+                d->CurrentFloating->moveFloating();
+            }
+            else if (d->CanDragStart)
+            {
+                int DragDistance = (d->DragStartMousePos - QCursor::pos()).manhattanLength();
+                if (DragDistance >= CDockManager::startDragDistance())
+                {
+                    d->CurrentFloating = dynamic_cast<CFloatingDragPreview*>(
+                        tabWidget()->startFloating(eDragState::DraggingFloatingWidget, mouseEvent->pos())
+                    );
+                }
+            }
             eventHandled = true;
         }
         else if (event->type() == QEvent::MouseButtonRelease)
@@ -939,6 +952,7 @@ bool CDockWidget::eventFilter(QObject *watched, QEvent *event)
                 d->CurrentFloating->removeEventFilter(this);
                 d->CurrentFloating->finishDragging();
                 d->CurrentFloating = nullptr;
+                d->CanDragStart = false;
             }
             
             eventHandled = true;
