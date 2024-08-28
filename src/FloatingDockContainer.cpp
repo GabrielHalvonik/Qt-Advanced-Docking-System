@@ -420,12 +420,12 @@ struct FloatingDockContainerPrivate
             
             if (auto container = qobject_cast<CFloatingDockContainer*>(floated); container)
             {
-                if (auto bar = DockContainer->topLevelDockArea()->currentDockWidget()->toolBar(); bar)
+                if (auto bar = DockContainer->topLevelDockArea()->currentDockWidget()->titleBar(); bar)
                 {
-                    bar->setStyleSheet(QString("QWidget { background-color: %0; }").arg(internal::ToolBarHighlightedColor));
+                    bar->setStyleSheet(QString("QWidget { background-color: %0; }").arg(internal::TitleBarHighlightedColor));
                     
                     QTimer::singleShot(350, [bar] {
-                        bar->setStyleSheet(QString("QWidget { background-color: %0; }").arg(internal::ToolBarColor));
+                        bar->setStyleSheet(QString("QWidget { background-color: %0; }").arg(internal::TitleBarColor));
                     });
                 }
             }

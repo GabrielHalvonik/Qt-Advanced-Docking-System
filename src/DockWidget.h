@@ -34,7 +34,6 @@
 
 #include "ads_globals.h"
 
-QT_FORWARD_DECLARE_CLASS(QToolBar)
 QT_FORWARD_DECLARE_CLASS(QXmlStreamWriter)
 
 namespace ads
@@ -65,7 +64,7 @@ private Q_SLOTS:
     /**
      * Adjusts the toolbar icon sizes according to the floating state
      */
-    void setToolbarFloatingStyle(bool topLevel);
+    void setTitleBarFloatingStyle(bool topLevel);
 
 protected:
     friend class CDockContainerWidget;
@@ -177,7 +176,7 @@ public:
         StateFloating
     };
 
-    enum eToolBarStyleSource
+    enum eTitleBarStyleSource
     {
     	ToolBarStyleFromDockManager,
     	ToolBarStyleFromDockWidget
@@ -257,7 +256,7 @@ public:
      * by calling setObjectName() after construction.
      * Use the layoutFlags to configure the layout of the dock widget.
      */
-    CDockWidget(const QString &title, QWidget* parent = nullptr);
+    CDockWidget(const QString &title, bool frameless = false, QWidget* parent = nullptr);
 
     /**
      * Virtual Destructor
@@ -468,7 +467,7 @@ public:
      * createDefaultToolBar() function or you need to assign your custom
      * toolbar via setToolBar().
      */
-    QToolBar* toolBar() const;
+    QWidget* titleBar() const;
 
     /**
      * If you would like to use the default top tool bar, then call this
@@ -476,25 +475,25 @@ public:
      * After this function the toolBar() function will return a valid toolBar()
      * object.
      */
-    QToolBar* createDefaultToolBar();
+    QFrame* createDefaultTitleBarFrame();
 
     /**
      * Assign a new tool bar that is shown above the content widget.
      * The dock widget will become the owner of the tool bar and deletes it
      * on destruction
      */
-    void setToolBar(QToolBar* ToolBar);
+    void setTitleBarWidget(QWidget* TitleBar);
 
     /**
      * Configures, if the dock widget uses the global tool bar styles from
      * dock manager or if it uses its own tool bar style
      */
-    void setToolBarStyleSource(eToolBarStyleSource Source);
+    void setTitleBarStyleSource(eTitleBarStyleSource Source);
 
     /**
      * Returns the configured tool bar style source
      */
-    eToolBarStyleSource toolBarStyleSource() const;
+    eTitleBarStyleSource toolBarStyleSource() const;
 
     /**
      * This function sets the tool button style for the given dock widget state.
@@ -504,13 +503,13 @@ public:
      * Qt::ToolButtonTextUnderIcon. For the docked state Qt::ToolButtonIconOnly
      * might be better.
      */
-    void setToolBarStyle(Qt::ToolButtonStyle Style, eState State);
+    void setTitleBarStyle(Qt::ToolButtonStyle Style, eState State);
 
     /**
      * Returns the tool button style for the given docking state.
      * \see setToolBarStyle()
      */
-    Qt::ToolButtonStyle toolBarStyle(eState State) const;
+    Qt::ToolButtonStyle titleBarStyle(eState State) const;
 
     /**
      * This function sets the tool button icon size for the given state.
@@ -518,13 +517,13 @@ public:
      * icon size is possible. For docked widgets, small icon sizes, eg. 16 x 16
      * might be better.
      */
-    void setToolBarIconSize(const QSize& IconSize, eState State);
+    void setTitleBarIconSize(const QSize& IconSize, eState State);
 
     /**
      * Returns the icon size for a given docking state.
      * \see setToolBarIconSize()
      */
-    QSize toolBarIconSize(eState State) const;
+    QSize titleBarIconSize(eState State) const;
 
     /**
      * Set the actions that will be shown in the dock area title bar

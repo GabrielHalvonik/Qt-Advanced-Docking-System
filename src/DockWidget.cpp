@@ -86,19 +86,21 @@ struct DockWidgetPrivate
     CFloatingDragPreview* CurrentFloating = nullptr;
     QPoint DragStartMousePos;
     bool CanDragStart = false;
+    bool IsFrameless = false;
 	bool Closed = false;
 	QScrollArea* ScrollArea = nullptr;
-	QToolBar* ToolBar = nullptr;
+	QFrame* TitleBarFrame = nullptr;
+    QWidget* TitleBar = nullptr;
 	Qt::ToolButtonStyle ToolBarStyleDocked = Qt::ToolButtonIconOnly;
 	Qt::ToolButtonStyle ToolBarStyleFloating = Qt::ToolButtonTextUnderIcon;
-	QSize ToolBarIconSizeDocked = QSize(16, 16);
-	QSize ToolBarIconSizeFloating = QSize(24, 24);
+	QSize TitleBarIconSizeDocked = QSize(16, 16);
+	QSize TitleBarIconSizeFloating = QSize(24, 24);
 	bool IsFloatingTopLevel = false;
 	QList<QAction*> TitleBarActions;
 	CDockWidget::eMinimumSizeHintMode MinimumSizeHintMode = CDockWidget::MinimumSizeHintFromDockWidget;
 	WidgetFactory* Factory = nullptr;
 	QPointer<CAutoHideTab> SideTabWidget;
-	CDockWidget::eToolBarStyleSource ToolBarStyleSource = CDockWidget::ToolBarStyleFromDockManager;
+	CDockWidget::eTitleBarStyleSource ToolBarStyleSource = CDockWidget::ToolBarStyleFromDockManager;
 	
 	/**
 	 * Private data constructor
@@ -131,7 +133,7 @@ struct DockWidgetPrivate
 	/**
 	 * Setup the top tool bar
 	 */
-	void setupToolBar();
+	void setupTitleBarFrame();
 
 	/**
 	 * Setup the main scroll area
@@ -294,22 +296,21 @@ void DockWidgetPrivate::closeAutoHideDockWidgetsIfNeeded()
 	}
 }
 
-
 //============================================================================
-void DockWidgetPrivate::setupToolBar()
+void DockWidgetPrivate::setupTitleBarFrame()
 {
-	ToolBar = new QToolBar(_this);
-	ToolBar->setObjectName("dockWidgetToolBar");
-	Layout->insertWidget(0, ToolBar);
-    ToolBar->setStyleSheet(QString("QWidget { background-color: %0; }").arg(internal::ToolBarColor));                // todo: replace with proper qss
-    // ToolBar->setMinimumHeight(24);
-	ToolBar->setIconSize(QSize(16, 16));
-	ToolBar->toggleViewAction()->setEnabled(false);
-	ToolBar->toggleViewAction()->setVisible(false);
-	_this->connect(_this, SIGNAL(topLevelChanged(bool)), SLOT(setToolbarFloatingStyle(bool)));
+    if (IsFrameless || TitleBarFrame) return;
+    
+    TitleBarFrame = new QFrame(_this);
+    TitleBarFrame->setFixedHeight(ads::internal::DefaultDockTitleBarHeight);
+    TitleBarFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+    TitleBarFrame->setStyleSheet(QString("QFrame { background-color: %1; }").arg(ads::internal::TitleBarColor));
+    
+    Layout->insertWidget(0, TitleBarFrame);
+    
+    _this->connect(_this, SIGNAL(topLevelChanged(bool)), SLOT(setTitleBarFloatingStyle(bool)));
+    _this->setTitleBarFloatingStyle(_this->isFloating());
 }
-
-
 
 //============================================================================
 void DockWidgetPrivate::setupScrollArea()
@@ -353,19 +354,20 @@ void DockWidgetPrivate::setToolBarStyleFromDockManager()
 		return;
 	}
 	auto State = CDockWidget::StateDocked;
-	_this->setToolBarIconSize(DockManager->dockWidgetToolBarIconSize(State), State);
-	_this->setToolBarStyle(DockManager->dockWidgetToolBarStyle(State), State);
+	_this->setTitleBarIconSize(DockManager->dockWidgetToolBarIconSize(State), State);
+	_this->setTitleBarStyle(DockManager->dockWidgetToolBarStyle(State), State);
 	State = CDockWidget::StateFloating;
-	_this->setToolBarIconSize(DockManager->dockWidgetToolBarIconSize(State), State);
-	_this->setToolBarStyle(DockManager->dockWidgetToolBarStyle(State), State);
+	_this->setTitleBarIconSize(DockManager->dockWidgetToolBarIconSize(State), State);
+	_this->setTitleBarStyle(DockManager->dockWidgetToolBarStyle(State), State);
 }
 
 
 //============================================================================
-CDockWidget::CDockWidget(const QString &title, QWidget *parent) :
+CDockWidget::CDockWidget(const QString &title, bool frameless, QWidget *parent) :
 	QFrame(parent),
 	d(new DockWidgetPrivate(this))
 {
+    d->IsFrameless = frameless;
 	d->Layout = new QBoxLayout(QBoxLayout::TopToBottom);
 	d->Layout->setContentsMargins(0, 0, 0, 0);
 	d->Layout->setSpacing(0);
@@ -379,14 +381,17 @@ CDockWidget::CDockWidget(const QString &title, QWidget *parent) :
 	d->ToggleViewAction->setCheckable(true);
 	connect(d->ToggleViewAction, SIGNAL(triggered(bool)), this,
 		SLOT(toggleView(bool)));
-	setToolbarFloatingStyle(false);
+	setTitleBarFloatingStyle(false);
 
 	if (CDockManager::testConfigFlag(CDockManager::FocusHighlighting))
 	{
 		setFocusPolicy(Qt::ClickFocus);
 	}
-
-    createDefaultToolBar()->installEventFilter(this);
+    
+    if (!frameless)
+    {
+        createDefaultTitleBarFrame()->installEventFilter(this);
+    }
 }
 
 //============================================================================
@@ -578,7 +583,7 @@ void CDockWidget::setDockManager(CDockManager* DockManager)
     
     if (d->Widget != nullptr && d->Widget->parent() != dockManager()->centralWidget())
     {
-        createDefaultToolBar()->installEventFilter(this);
+        createDefaultTitleBarFrame()->installEventFilter(this);
     }
 
 	if (ToolBarStyleFromDockManager == d->ToolBarStyleSource)
@@ -980,7 +985,7 @@ bool CDockWidget::eventFilter(QObject *watched, QEvent *event)
         }
     }
 
-    if (watched != nullptr && watched == toolBar())
+    if (watched != nullptr && watched == titleBar())
     {
         if (
             event->type() == QEvent::MouseButtonPress ||
@@ -1044,41 +1049,38 @@ QIcon CDockWidget::icon() const
 
 
 //============================================================================
-QToolBar* CDockWidget::toolBar() const
+QWidget* CDockWidget::titleBar() const
 {
-	return d->ToolBar;
+    return (d->TitleBar) ? d->TitleBar : d->TitleBarFrame;
 }
 
 
 //============================================================================
-QToolBar* CDockWidget::createDefaultToolBar()
+QFrame* CDockWidget::createDefaultTitleBarFrame()
 {
-	if (!d->ToolBar)
+	if (!d->TitleBarFrame)
 	{
-		d->setupToolBar();
+		d->setupTitleBarFrame();
 	}
 
-	return d->ToolBar;
+	return d->TitleBarFrame;
 }
 
 
 //============================================================================
-void CDockWidget::setToolBar(QToolBar* ToolBar)
+void CDockWidget::setTitleBarWidget(QWidget* TitleBar)
 {
-	if (d->ToolBar)
+	if (!d->TitleBarFrame)
 	{
-		delete d->ToolBar;
+        d->setupTitleBarFrame();
 	}
-
-	d->ToolBar = ToolBar;
-	d->Layout->insertWidget(0, d->ToolBar);
-	this->connect(this, SIGNAL(topLevelChanged(bool)), SLOT(setToolbarFloatingStyle(bool)));
-	setToolbarFloatingStyle(isFloating());
+    d->TitleBar = TitleBar;
+    d->TitleBar->setParent(d->TitleBarFrame);
 }
 
 
 //============================================================================
-void CDockWidget::setToolBarStyle(Qt::ToolButtonStyle Style, eState State)
+void CDockWidget::setTitleBarStyle(Qt::ToolButtonStyle Style, eState State)
 {
 	if (StateFloating == State)
 	{
@@ -1089,12 +1091,12 @@ void CDockWidget::setToolBarStyle(Qt::ToolButtonStyle Style, eState State)
 		d->ToolBarStyleDocked = Style;
 	}
 
-	setToolbarFloatingStyle(isFloating());
+	setTitleBarFloatingStyle(isFloating());
 }
 
 
 //============================================================================
-Qt::ToolButtonStyle CDockWidget::toolBarStyle(eState State) const
+Qt::ToolButtonStyle CDockWidget::titleBarStyle(eState State) const
 {
 	if (StateFloating == State)
 	{
@@ -1108,54 +1110,54 @@ Qt::ToolButtonStyle CDockWidget::toolBarStyle(eState State) const
 
 
 //============================================================================
-void CDockWidget::setToolBarIconSize(const QSize& IconSize, eState State)
+void CDockWidget::setTitleBarIconSize(const QSize& IconSize, eState State)
 {
 	if (StateFloating == State)
 	{
-		d->ToolBarIconSizeFloating = IconSize;
+		d->TitleBarIconSizeFloating = IconSize;
 	}
 	else
 	{
-		d->ToolBarIconSizeDocked = IconSize;
+		d->TitleBarIconSizeDocked = IconSize;
 	}
 
-	setToolbarFloatingStyle(isFloating());
+	setTitleBarFloatingStyle(isFloating());
 }
 
 
 //============================================================================
-QSize CDockWidget::toolBarIconSize(eState State) const
+QSize CDockWidget::titleBarIconSize(eState State) const
 {
 	if (StateFloating == State)
 	{
-		return d->ToolBarIconSizeFloating;
+		return d->TitleBarIconSizeFloating;
 	}
 	else
 	{
-		return d->ToolBarIconSizeDocked;
+		return d->TitleBarIconSizeDocked;
 	}
 }
 
 
 //============================================================================
-void CDockWidget::setToolbarFloatingStyle(bool Floating)
+void CDockWidget::setTitleBarFloatingStyle(bool Floating)
 {
-	if (!d->ToolBar)
+	if (!d->TitleBarFrame)
 	{
 		return;
 	}
 
-	auto IconSize = Floating ? d->ToolBarIconSizeFloating : d->ToolBarIconSizeDocked;
-	if (IconSize != d->ToolBar->iconSize())
-	{
-		d->ToolBar->setIconSize(IconSize);
-	}
+	// auto IconSize = Floating ? d->ToolBarIconSizeFloating : d->ToolBarIconSizeDocked;
+	// if (IconSize != d->ToolBar->iconSize())
+	// {
+	// 	d->ToolBar->setIconSize(IconSize);
+	// }
 
-	auto ButtonStyle = Floating ? d->ToolBarStyleFloating : d->ToolBarStyleDocked;
-	if (ButtonStyle != d->ToolBar->toolButtonStyle())
-	{
-		d->ToolBar->setToolButtonStyle(ButtonStyle);
-	}
+	// auto ButtonStyle = Floating ? d->ToolBarStyleFloating : d->ToolBarStyleDocked;
+	// if (ButtonStyle != d->ToolBar->toolButtonStyle())
+	// {
+	// 	d->ToolBar->setToolButtonStyle(ButtonStyle);
+	// }
 }
 
 
@@ -1452,7 +1454,7 @@ void CDockWidget::toggleAutoHide(SideBarLocation Location)
 
 
 //============================================================================
-void CDockWidget::setToolBarStyleSource(eToolBarStyleSource Source)
+void CDockWidget::setTitleBarStyleSource(eTitleBarStyleSource Source)
 {
 	d->ToolBarStyleSource = Source;
 	if (ToolBarStyleFromDockManager == d->ToolBarStyleSource)
@@ -1463,7 +1465,7 @@ void CDockWidget::setToolBarStyleSource(eToolBarStyleSource Source)
 
 
 //============================================================================
-CDockWidget::eToolBarStyleSource CDockWidget::toolBarStyleSource() const
+CDockWidget::eTitleBarStyleSource CDockWidget::toolBarStyleSource() const
 {
 	return d->ToolBarStyleSource;
 }

@@ -69,6 +69,8 @@ struct FloatingDragPreviewPrivate
 	 */
 	void cancelDragging()
     {
+        if (!Content) return;
+        
         if (auto widget = qobject_cast<CDockWidget*>(Content); widget)
         {
             if (auto area = widget->dockAreaWidget(); area)
@@ -83,12 +85,12 @@ struct FloatingDragPreviewPrivate
                     area->setCurrentIndex(DraggedTabBarIndex);
                 }
                 
-                if (auto bar = area->currentDockWidget()->toolBar(); bar)
+                if (auto bar = area->currentDockWidget()->titleBar(); bar)
                 {
-                    bar->setStyleSheet(QString("QWidget { background-color: %0; }").arg(internal::ToolBarHighlightedColor));
+                    bar->setStyleSheet(QString("QWidget { background-color: %0; }").arg(internal::TitleBarHighlightedColor));
                         
                     QTimer::singleShot(350, [bar] {
-                        bar->setStyleSheet(QString("QWidget { background-color: %0; }").arg(internal::ToolBarColor));
+                        bar->setStyleSheet(QString("QWidget { background-color: %0; }").arg(internal::TitleBarColor));
                     });
                 }
             }
@@ -98,12 +100,12 @@ struct FloatingDragPreviewPrivate
         {
             if (ContentSourceArea->currentDockWidget())
             {
-                if (auto bar = ContentSourceArea->currentDockWidget()->toolBar(); bar)
+                if (auto bar = ContentSourceArea->currentDockWidget()->titleBar(); bar)
                 {
-                    bar->setStyleSheet(QString("QWidget { background-color: %0; }").arg(internal::ToolBarHighlightedColor));
+                    bar->setStyleSheet(QString("QWidget { background-color: %0; }").arg(internal::TitleBarHighlightedColor));
                     
                     QTimer::singleShot(350, [bar] {
-                        bar->setStyleSheet(QString("QWidget { background-color: %0; }").arg(internal::ToolBarColor));
+                        bar->setStyleSheet(QString("QWidget { background-color: %0; }").arg(internal::TitleBarColor));
                     });
                 }
             }

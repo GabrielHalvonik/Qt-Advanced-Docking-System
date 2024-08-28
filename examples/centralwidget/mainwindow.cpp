@@ -44,7 +44,7 @@ CMainWindow::CMainWindow(QWidget *parent)
     QPlainTextEdit* w = new QPlainTextEdit();
 	w->setPlaceholderText("This is the central editor. Enter your text here.");
     CentralWidget* widget = new CentralWidget();
-    CDockWidget* CentralDockWidget = new CDockWidget("CentralWidget");
+    CDockWidget* CentralDockWidget = new CDockWidget("CentralWidget", true);
     CentralDockWidget->setWidget(widget);
     auto* CentralDockArea = DockManager->setCentralWidget(CentralDockWidget);
     CentralDockArea->setAllowedAreas(DockWidgetArea::OuterDockAreas);
@@ -55,6 +55,9 @@ CMainWindow::CMainWindow(QWidget *parent)
     TableDockWidget->setWidget(table);
     TableDockWidget->setMinimumSizeHintMode(CDockWidget::MinimumSizeHintFromDockWidgetMinimumSize);
     TableDockWidget->resize(250, 150);
+    // auto ttl = new QWidget();
+    // ttl->setStyleSheet("QWidget { background-color: red; }");
+    // TableDockWidget->setTitleBarWidget(ttl);
     // TableDockWidget->setMinimumSize(200,150);
     auto TableArea = DockManager->addDockWidget(DockWidgetArea::LeftDockWidgetArea, TableDockWidget);
     ui->menuView->addAction(TableDockWidget->toggleViewAction());
