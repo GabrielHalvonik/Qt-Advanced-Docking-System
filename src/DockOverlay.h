@@ -68,6 +68,11 @@ public:
 	 */
 	virtual ~CDockOverlay();
 
+    /**
+     * Returns widget that is drop operation about to happen
+     */
+    QWidget* targetDropWidget() const;
+
 	/**
 	 * Configures the areas that are allowed for docking
 	 */
@@ -106,12 +111,17 @@ public:
 	 */
 	DockWidgetArea visibleDropAreaUnderCursor() const;
 
+    /**
+     * Clears drop area strip
+     */
+    void clearDockDropStrip();
+
 	/**
 	 * Show the drop overly for the given target widget
 	 */
-	DockWidgetArea showOverlay(QWidget* target);
+    DockWidgetArea showOverlay(QWidget* target);
 
-	/**
+    /**
 	 * Hides the overlay
 	 */
 	void hideOverlay();
@@ -128,11 +138,6 @@ public:
 	bool dropPreviewEnabled() const;
 
 	/**
-	 * The drop overlay rectangle for the target area
-	 */
-	QRect dropOverlayRect() const;
-
-	/**
 	 * Handle polish events
 	 */
 	virtual bool event(QEvent *e) override;
@@ -141,6 +146,7 @@ protected:
 	virtual void paintEvent(QPaintEvent *e) override;
 	virtual void showEvent(QShowEvent* e) override;
 	virtual void hideEvent(QHideEvent* e) override;
+
 };
 
 
@@ -222,6 +228,11 @@ public:
 	 */
 	virtual ~CDockOverlayCross();
 
+    /**
+     * Creates area widgets for each dock area
+     */
+    void createAreaWidgets();
+
 	/**
 	 * Sets a certain icon color
 	 */
@@ -273,8 +284,11 @@ public:
     void setIconColors(const QString& Colors);
 
 protected:
+
 	virtual void showEvent(QShowEvent* e) override;
-	void setAreaWidgets(const QHash<DockWidgetArea, QWidget*>& widgets);
+    virtual bool eventFilter(QObject* obj, QEvent* event) override;
+
+    void setAreaWidgets(const QHash<DockWidgetArea, QWidget*>& widgets);
 }; // CDockOverlayCross
 
 } // namespace ads

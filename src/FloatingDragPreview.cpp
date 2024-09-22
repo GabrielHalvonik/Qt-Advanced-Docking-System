@@ -196,12 +196,21 @@ void FloatingDragPreviewPrivate::updateDropOverlays(const QPoint &GlobalPos)
     
     if (top)
     {
-        DockManager->dockAreaOverlay()->showOverlay(target);
+        auto area = DockManager->dockAreaOverlay()->showOverlay(target);
         DropContainer = top;
+        if (area != InvalidDockWidgetArea || area != NoDockWidgetArea)
+        {
+            _this->setWindowOpacity(ads::internal::HoveredOverDockAreaOpacity);
+        }
+        else
+        {
+            _this->setWindowOpacity(1.0);
+        }
     }
     else
     {
         DockManager->dockAreaOverlay()->hideOverlay();
+        _this->setWindowOpacity(1.0);
     }
     
     return;
@@ -343,13 +352,17 @@ void CFloatingDragPreview::moveFloating()
     else
     {
         int borderSize = (frameSize().width() - size().width()) / 2;
-        QPoint currentCursorPos = QCursor::pos();
-        QPoint moveToPos = currentCursorPos - d->DragStartMousePosition - QPoint(borderSize, 0) - QPoint(internal::DockMarginSize, internal::DockMarginSize);
-        QPoint offset = moveToPos - pos();
+
+        const QPoint cursorPos = QCursor::pos();
+        QPoint moveToPos = cursorPos - d->DragStartMousePosition - QPoint(borderSize, 0);
+        move(moveToPos);
+        // QPoint currentCursorPos = QCursor::pos();
+        // QPoint moveToPos = currentCursorPos - d->DragStartMousePosition - QPoint(borderSize, 0) - QPoint(internal::DockMarginSize, internal::DockMarginSize);
+        // QPoint offset = moveToPos - pos();
         
-        auto cursorScreen = FloatingHelper::currentlyHoveredScreen();
-        auto overhang = FloatingHelper::calculateOverhang(cursorScreen->availableGeometry(), geometry().translated(offset));
-        move(moveToPos - overhang);
+        // auto cursorScreen = FloatingHelper::currentlyHoveredScreen();
+        // auto overhang = FloatingHelper::calculateOverhang(cursorScreen->availableGeometry(), geometry().translated(offset));
+        // move(moveToPos - overhang);
         
         d->updateDropOverlays(QCursor::pos());
     }
@@ -424,7 +437,6 @@ void CFloatingDragPreview::finishDragging(bool)
     
     if (auto widget = qobject_cast<CDockWidget*>(d->Content); widget && widget->isTabbed())
     {
-        
         if (auto area = widget->dockAreaWidget(); area)
         {
             area->setCurrentDockWidget(area->dockWidget(d->DraggedTabBarIndex));
@@ -436,8 +448,8 @@ void CFloatingDragPreview::finishDragging(bool)
         d->ContentSourceArea->show();
     }
     
-	auto DockDropArea = d->DockManager->dockAreaOverlay()->visibleDropAreaUnderCursor();
-	auto ContainerDropArea = d->DockManager->containerOverlay()->visibleDropAreaUnderCursor();
+    auto DockDropArea = d->DockManager->dockAreaOverlay()->dropAreaUnderCursor();
+    auto ContainerDropArea = d->DockManager->containerOverlay()->dropAreaUnderCursor();
 	bool ValidDropArea = (DockDropArea != InvalidDockWidgetArea) || (ContainerDropArea != InvalidDockWidgetArea);
 	// Non floatable auto hide widgets should stay in its current auto hide
 	// state if they are dragged into a floating window
@@ -446,7 +458,6 @@ void CFloatingDragPreview::finishDragging(bool)
 	{
 		cleanupAutoHideContainerWidget(ContainerDropArea);
 	}
-
 	if (!d->DropContainer)
 	{
 		d->createFloatingWidget();
@@ -536,20 +547,20 @@ void CFloatingDragPreview::paintEvent(QPaintEvent* event)
 
 	// If we do not have a window frame then we paint a QRubberBand like
 	// frameless window
-	if (!CDockManager::testConfigFlag(CDockManager::DragPreviewHasWindowFrame))
-	{
-		QColor Color = palette().color(QPalette::Active, QPalette::Highlight);
-		QPen Pen = painter.pen();
-		Pen.setColor(Color.darker(120));
-		Pen.setStyle(Qt::SolidLine);
-		Pen.setWidth(1);
-		Pen.setCosmetic(true);
-		painter.setPen(Pen);
-		Color = Color.lighter(130);
-		Color.setAlpha(64);
-		painter.setBrush(Color);
-		painter.drawRect(rect().adjusted(0, 0, 0, 0));
-	}
+    // if (!CDockManager::testConfigFlag(CDockManager::DragPreviewHasWindowFrame))
+    // {
+        // QColor Color = palette().color(QPalette::Active, QPalette::Highlight);
+        // QPen Pen = painter.pen();
+        // Pen.setColor(Color.darker(120));
+        // Pen.setStyle(Qt::SolidLine);
+        // Pen.setWidth(1);
+        // Pen.setCosmetic(true);
+        // painter.setPen(Pen);
+        // Color = Color.lighter(130);
+        // Color.setAlpha(64);
+        // painter.setBrush(Color);
+        // painter.drawRect(rect().adjusted(0, 0, 0, 0));
+    // }
 }
 
 //============================================================================

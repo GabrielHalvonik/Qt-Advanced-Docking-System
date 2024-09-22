@@ -161,12 +161,17 @@ Q_ENUMS(SideBarLocation)
 
 namespace internal
 {
-static const qreal DraggingDockOpacity = 0.9;
-static const qreal CoveredDockOpacity = 0.6;
+static const qreal DraggingDockOpacity = 1.0;
+static const qreal CoveredDockOpacity = 1.0;
+static const qreal HoveredOverDockAreaOpacity = 0.6;
 static const bool RestoreTesting = true;
 static const int DockMarginSize = 0;
-static const int DefaultDockTitleBarHeight = 22;
+static const int DockingAreaStripDetectSize = 8;
+static const int DefaultDockTitleBarHeight = 24;
 static const bool Restore = false;
+static const QString HighlightDropAreaColorSpreadStart = QString("rgba(80, 120, 200, 200)");
+static const QString HighlightDropAreaColorSpreadMiddle = QString("rgba(80, 120, 200, 150)");
+static const QString HighlightDropAreaColorSpreadEnd = QString("rgba(80, 120, 200, 100)");
 static const QString TitleBarColor = "rgb(80, 80, 80)";
 static const QString TitleBarHighlightedColor = "rgb(140, 160, 180)";
 static const char* const ClosedProperty = "close";

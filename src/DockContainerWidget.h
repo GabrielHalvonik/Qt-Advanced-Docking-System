@@ -91,7 +91,6 @@ protected:
 	 * Handles activation events to update zOrderIndex
 	 */
 	virtual bool event(QEvent *e) override;
-
 	/**
 	 * Access function for the internal root splitter
 	 */

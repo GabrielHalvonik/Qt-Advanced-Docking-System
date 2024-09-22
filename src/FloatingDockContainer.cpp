@@ -552,10 +552,11 @@ void FloatingDockContainerPrivate::titleMouseReleaseEvent()
         || DockManager->containerOverlay()->dropAreaUnderCursor() != InvalidDockWidgetArea)
     {
         CDockOverlay *Overlay = DockManager->containerOverlay();
-        if (!Overlay->dropOverlayRect().isValid())
-        {
-            Overlay = DockManager->dockAreaOverlay();
-        }
+        // Overlay->
+        // if (!Overlay->dropOverlayRect().isValid())
+        // {
+        //     Overlay = DockManager->dockAreaOverlay();
+        // }
 
         // Do not resize if we drop into an autohide sidebar area to preserve
         // the dock area size for the initial size of the auto hide area
@@ -563,20 +564,20 @@ void FloatingDockContainerPrivate::titleMouseReleaseEvent()
         {
             // Resize the floating widget to the size of the highlighted drop area
             // rectangle
-            QRect Rect = Overlay->dropOverlayRect();
-            int FrameWidth = (_this->frameSize().width() - _this->rect().width())
-                             / 2;
-            int TitleBarHeight = _this->frameSize().height()
-                                 - _this->rect().height() - FrameWidth;
-            if (Rect.isValid())
-            {
-                QPoint TopLeft = Overlay->mapToGlobal(Rect.topLeft());
-                TopLeft.ry() += TitleBarHeight;
-                _this->setGeometry(
-                    QRect(TopLeft,
-                          QSize(Rect.width(), Rect.height() - TitleBarHeight)));
-                QApplication::processEvents();
-            }
+            // QRect Rect = Overlay->dropOverlayRect();
+            // int FrameWidth = (_this->frameSize().width() - _this->rect().width())
+            //                  / 2;
+            // int TitleBarHeight = _this->frameSize().height()
+            //                      - _this->rect().height() - FrameWidth;
+            // if (Rect.isValid())
+            // {
+            //     QPoint TopLeft = Overlay->mapToGlobal(Rect.topLeft());
+            //     TopLeft.ry() += TitleBarHeight;
+            //     _this->setGeometry(
+            //         QRect(TopLeft,
+            //               QSize(Rect.width(), Rect.height() - TitleBarHeight)));
+            //     QApplication::processEvents();
+            // }
         }
         DropContainer->dropFloatingWidget(_this, QCursor::pos());
     }
@@ -627,12 +628,21 @@ void FloatingDockContainerPrivate::updateDropOverlays(const QPoint &GlobalPos)
     
     if (top)
     {
-        DockManager->dockAreaOverlay()->showOverlay(target);
+        auto area = DockManager->dockAreaOverlay()->showOverlay(target);
         DropContainer = top;
+        if (area != InvalidDockWidgetArea || area != NoDockWidgetArea)
+        {
+            _this->setWindowOpacity(ads::internal::HoveredOverDockAreaOpacity);
+        }
+        else
+        {
+            _this->setWindowOpacity(1.0);
+        }
     }
     else
     {
         DockManager->dockAreaOverlay()->hideOverlay();
+        _this->setWindowOpacity(1.0);
     }
     
     return;    
@@ -1118,11 +1128,11 @@ void CFloatingDockContainer::startDragging(const QPoint &DragStartMousePos, cons
     {
         setWindowOpacity(internal::DraggingDockOpacity);
         
-        QPalette pal;
-        auto color = palette().color(QPalette::Active, QPalette::Highlight).darker(120);
-        color.setAlpha(100);
-        pal.setBrush(QPalette::Current, QPalette::Window, color);
-        setPalette(pal);
+        // QPalette pal;
+        // auto color = palette().color(QPalette::Active, QPalette::Highlight).darker(120);
+        // color.setAlpha(100);
+        // pal.setBrush(QPalette::Current, QPalette::Window, color);
+        // setPalette(pal);
     }
     
     startFloating(DragStartMousePos, Size, DraggingFloatingWidget, MouseEventHandler);

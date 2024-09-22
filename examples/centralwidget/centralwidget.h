@@ -24,7 +24,7 @@ public:
         setStyleSheet("QWidget { background-color: orange; }");
         QWidget::enterEvent(event);
     }
-    
+
     void leaveEvent(QEvent* event) override
     {
         setStyleSheet("QWidget { background-color: gray; }");
