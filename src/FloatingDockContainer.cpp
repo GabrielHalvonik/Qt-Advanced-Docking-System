@@ -740,7 +740,7 @@ CFloatingDockContainer::CFloatingDockContainer(CDockManager *DockManager) :
 
 #endif
 
-    setWindowFlags(Qt::Tool | Qt::CustomizeWindowHint);
+    setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::CustomizeWindowHint);
     DockManager->registerFloatingWidget(this);
     
     qApp->installEventFilter(this);
